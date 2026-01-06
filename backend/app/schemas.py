@@ -22,3 +22,12 @@ class BatchEncodeResponse(BaseModel):
     count: int
 
 
+class MerchantCredential(BaseModel):
+    email: str
+    password: str
+
+class MerchantCreateResponse(BaseModel):
+    credentials: List[MerchantCredential]
+    count: int
+
+

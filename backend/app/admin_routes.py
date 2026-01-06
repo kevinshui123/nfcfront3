@@ -4,6 +4,7 @@ from .auth import get_current_user
 from .db import async_session
 from . import crud
 from .schemas import UserCreate, Token, BatchEncodeRequest, BatchEncodeResponse
+from .schemas import MerchantCreateResponse, MerchantCredential
 import uuid
 from typing import List, Dict, Any
 import json
@@ -100,10 +101,38 @@ async def batch_encode(shop_id: str, payload: BatchEncodeRequest, db: AsyncSessi
     return {"tokens": tokens, "count": len(tokens)}
 
 
+@router.post("/admin/shops/{shop_id}/create_merchants", response_model=MerchantCreateResponse)
+async def create_merchants(shop_id: str, count: int = 1, db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
+    # only platform admins can create merchant accounts
+    if not getattr(user, "is_admin", 0):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    if count <= 0 or count > 1000:
+        raise HTTPException(status_code=400, detail="Invalid count")
+    creds = []
+    from secrets import token_urlsafe
+    for _ in range(count):
+        email = f"merchant+{uuid.uuid4().hex[:8]}@example.com"
+        pwd = token_urlsafe(8)
+        # create merchant user linked to shop
+        created = await crud.create_user(db, email, pwd, shop_id=shop_id, is_admin=0)
+        creds.append({"email": created.email, "password": pwd})
+    return {"credentials": creds, "count": len(creds)}
+
+
 @router.get("/shops")
 async def list_shops(db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
-    summaries = await crud.list_shops_with_metrics(db)
-    return summaries
+    # Admins see all shops; merchant users see only their shop
+    if getattr(user, "is_admin", 0):
+        summaries = await crud.list_shops_with_metrics(db)
+        return summaries
+    # merchant view
+    if not getattr(user, "shop_id", None):
+        raise HTTPException(status_code=403, detail="No shop assigned")
+    shops = await crud.list_shops_with_metrics(db)
+    for s in shops:
+        if s["id"] == user.shop_id:
+            return [s]
+    return []
 
 
 @router.get("/social/{platform}/auth")

@@ -6,10 +6,10 @@ from sqlalchemy.exc import IntegrityError
 
 
 
-async def create_user(db: AsyncSession, email: str, password: str):
+async def create_user(db: AsyncSession, email: str, password: str, shop_id: str | None = None, is_admin: int = 0):
     # import hashing function locally to avoid circular import at module load
     from .auth import get_password_hash
-    user = models.User(id=str(uuid.uuid4()), email=email, hashed_password=get_password_hash(password))
+    user = models.User(id=str(uuid.uuid4()), email=email, hashed_password=get_password_hash(password), shop_id=shop_id, is_admin=is_admin)
     db.add(user)
     await db.commit()
     await db.refresh(user)

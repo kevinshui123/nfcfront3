@@ -54,6 +54,10 @@ class User(Base):
     email = Column(String, unique=True, nullable=False, index=True)
     hashed_password = Column(String, nullable=False)
     is_active = Column(Integer, default=1)
+    # Optional: link user to a shop (merchant account)
+    shop_id = Column(String(length=36), ForeignKey("shops.id"), nullable=True)
+    # Role flag: 1 = admin (platform owner), 0 = regular merchant
+    is_admin = Column(Integer, default=0)
     created_at = Column(DateTime, server_default=func.now())
 
 
