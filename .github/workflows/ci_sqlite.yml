@@ -11,6 +11,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Debug runner environment
+        run: |
+          echo "=== Debug: runner info ==="
+          uname -a || echo "uname not available"
+          python --version || true
+          which python || where python || true
+          echo "PWD: $(pwd)"
+          echo "Listing backend directory:"
+          ls -la backend || true
+          echo "Sys.path:"
+          python - <<'PY'
+import sys, os
+print(sys.executable)
+print(os.getcwd())
+print(sys.path)
+PY
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
