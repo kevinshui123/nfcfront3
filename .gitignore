@@ -3,3 +3,10 @@
 .env
 
 node_modules
+.venv
+backend/venv
+*.db
+release/*.zip
+*.log
+__pycache__/
+*.pyc
