@@ -101,22 +101,32 @@ async def batch_encode(shop_id: str, payload: BatchEncodeRequest, db: AsyncSessi
     return {"tokens": tokens, "count": len(tokens)}
 
 
-@router.post("/admin/shops/{shop_id}/create_merchants", response_model=MerchantCreateResponse)
-async def create_merchants(shop_id: str, count: int = 1, db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
+@router.post("/admin/merchants", response_model=MerchantCredential)
+async def create_merchant(db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
     # only platform admins can create merchant accounts
     if not getattr(user, "is_admin", 0):
         raise HTTPException(status_code=403, detail="Forbidden")
-    if count <= 0 or count > 1000:
-        raise HTTPException(status_code=400, detail="Invalid count")
-    creds = []
+
     from secrets import token_urlsafe
-    for _ in range(count):
-        email = f"merchant+{uuid.uuid4().hex[:8]}@example.com"
-        pwd = token_urlsafe(8)
-        # create merchant user linked to shop
-        created = await crud.create_user(db, email, pwd, shop_id=shop_id, is_admin=0)
-        creds.append({"email": created.email, "password": pwd})
-    return {"credentials": creds, "count": len(creds)}
+    import random
+    import string
+
+    # Generate random username and password
+    username = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
+    password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+
+    # Create a new shop for this merchant
+    shop_id = str(uuid.uuid4())
+    await db.execute(
+        "INSERT INTO shops (id, name, created_at) VALUES (:id, :name, now())",
+        {"id": shop_id, "name": f"Shop {username}"}
+    )
+
+    # Create merchant user linked to the new shop
+    created = await crud.create_user(db, f"{username}@merchant.local", password, shop_id=shop_id, is_admin=0)
+    await db.commit()
+
+    return {"username": username, "password": password, "shop_id": shop_id}
 
 
 @router.get("/shops")
@@ -161,5 +171,48 @@ async def social_publish(platform: str, payload: Dict[str, Any]):
     # return a mock publish id for front-end to reference
     publish_id = str(uuid.uuid4())
     return {"status": "mocked", "platform": platform, "result": "success", "publish_id": publish_id}
+
+
+@router.get("/merchant/{shop_id}")
+async def get_merchant_dashboard(shop_id: str, db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
+    # Only allow access if user is admin or belongs to this shop
+    if not getattr(user, "is_admin", 0) and getattr(user, "shop_id", None) != shop_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    # Get shop info
+    shop_result = await db.execute("SELECT id, name FROM shops WHERE id = :shop_id", {"shop_id": shop_id})
+    shop_row = shop_result.fetchone()
+    if not shop_row:
+        raise HTTPException(status_code=404, detail="Shop not found")
+
+    shop = {"id": shop_row[0], "name": shop_row[1]}
+
+    # Get today's visits and reviews for this shop
+    today = __import__('datetime').date.today()
+    visits_result = await db.execute(
+        "SELECT COUNT(*) FROM visits WHERE shop_id = :shop_id AND DATE(created_at) = :today",
+        {"shop_id": shop_id, "today": today}
+    )
+    visits = visits_result.scalar() or 0
+
+    reviews_result = await db.execute(
+        "SELECT COUNT(*) FROM contents WHERE shop_id = :shop_id AND DATE(created_at) = :today",
+        {"shop_id": shop_id, "today": today}
+    )
+    reviews = reviews_result.scalar() or 0
+
+    # Get recent contents for this shop
+    contents_result = await db.execute(
+        "SELECT id, title, token, platform, created_at FROM contents WHERE shop_id = :shop_id ORDER BY created_at DESC LIMIT 50",
+        {"shop_id": shop_id}
+    )
+    contents = [{"id": r[0], "title": r[1], "token": r[2], "platform": r[3] or "unknown", "created_at": r[4].isoformat() if r[4] else None} for r in contents_result.fetchall()]
+
+    return {
+        "shop": shop,
+        "visits": visits,
+        "reviews": reviews,
+        "contents": contents
+    }
 
 
