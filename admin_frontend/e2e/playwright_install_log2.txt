@@ -1,0 +1,1 @@
+Running Playwright install in C:\Users\Administrator\Desktop\nfc\admin_frontend\e2e

@@ -1,0 +1,43 @@
+Running Playwright tests in C:\Users\Administrator\Desktop\nfc\admin_frontend\e2e
+
+Running 2 tests using 2 workers
+
+(node:18320) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:5344) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:18320) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:5344) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 2 tests\login.spec.ts:3:5 › login and navigate to tags (368ms)
+  x  1 tests\dashboard.spec.ts:3:5 › login -> dashboard -> open merchant panel (5.8s)
+
+
+  1) tests\dashboard.spec.ts:3:5 › login -> dashboard -> open merchant panel ───────────────────────
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/tags/[39m
+    Received string:  [31m"http://localhost:5173/merchant/9e2e0978-1f3f-43da-860b-791508a0b1fa"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    9 × unexpected value "http://localhost:5173/merchant/9e2e0978-1f3f-43da-860b-791508a0b1fa"[22m
+
+
+      11 |   const btn = page.locator('button:has-text("查看")').first();
+      12 |   await btn.click();
+    > 13 |   await expect(page).toHaveURL(/\/tags/);
+         |                      ^
+      14 |   await expect(page.locator('text=标签批量生成')).toBeVisible();
+      15 | });
+      16 |
+        at C:\Users\Administrator\Desktop\nfc\admin_frontend\e2e\tests\dashboard.spec.ts:13:22
+
+    Error Context: test-results\dashboard-login---dashboard---open-merchant-panel\error-context.md
+
+  1 failed
+    tests\dashboard.spec.ts:3:5 › login -> dashboard -> open merchant panel ────────────────────────
+  1 passed (6.5s)

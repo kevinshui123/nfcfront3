@@ -1,0 +1,560 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "AllValue Link Backend (scaffold)",
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/health": {
+            "get": {
+                "summary": "Health",
+                "operationId": "health_health_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/t/{token}": {
+            "get": {
+                "summary": "Resolve Token",
+                "description": "Resolve a token stored in nfc_tags table and return content.",
+                "operationId": "resolve_token_t__token__get",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Token",
+                            "type": "string"
+                        },
+                        "name": "token",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ContentResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/generate": {
+            "post": {
+                "summary": "Ai Generate",
+                "description": "Proxy endpoint to call Silra (or other LLM) service.\nReads SILRA_API_KEY from environment; do NOT commit keys to repo.",
+                "operationId": "ai_generate_ai_generate_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AIGenerateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AIGenerateResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/register": {
+            "post": {
+                "summary": "Register",
+                "operationId": "register_api_auth_register_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserCreate"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Token"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/token": {
+            "post": {
+                "summary": "Login",
+                "operationId": "login_api_auth_token_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserCreate"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Token"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/shops/{shop_id}/tags/batch_encode": {
+            "post": {
+                "summary": "Batch Encode",
+                "description": "Generate `count` tokens for a shop and persist NFCTag rows.\nReturns the list of tokens (and count). In production, you may want to store CSV on blob storage.",
+                "operationId": "batch_encode_api_shops__shop_id__tags_batch_encode_post",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Shop Id",
+                            "type": "string"
+                        },
+                        "name": "shop_id",
+                        "in": "path"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BatchEncodeRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BatchEncodeResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ]
+            }
+        },
+        "/api/shops": {
+            "get": {
+                "summary": "List Shops",
+                "operationId": "list_shops_api_shops_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ]
+            }
+        },
+        "/api/social/{platform}/auth": {
+            "get": {
+                "summary": "Social Auth",
+                "description": "Mock endpoint that returns a URL to start OAuth for a given platform.\nIn production this would redirect to the platform's OAuth consent URL.",
+                "operationId": "social_auth_api_social__platform__auth_get",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Platform",
+                            "type": "string"
+                        },
+                        "name": "platform",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/social/{platform}/publish": {
+            "post": {
+                "summary": "Social Publish",
+                "description": "Mock publish endpoint. In production this would accept an access token and content,\nthen call the platform API to publish.",
+                "operationId": "social_publish_api_social__platform__publish_post",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Platform",
+                            "type": "string"
+                        },
+                        "name": "platform",
+                        "in": "path"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "title": "Payload",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AIGenerateRequest": {
+                "title": "AIGenerateRequest",
+                "type": "object",
+                "properties": {
+                    "model": {
+                        "title": "Model",
+                        "type": "string",
+                        "default": "deepseek-chat"
+                    },
+                    "messages": {
+                        "title": "Messages",
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        }
+                    },
+                    "temperature": {
+                        "title": "Temperature",
+                        "type": "number",
+                        "default": 0.0
+                    },
+                    "stream": {
+                        "title": "Stream",
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "shop_id": {
+                        "title": "Shop Id",
+                        "type": "string"
+                    },
+                    "template_id": {
+                        "title": "Template Id",
+                        "type": "string"
+                    },
+                    "context": {
+                        "title": "Context",
+                        "type": "object"
+                    }
+                }
+            },
+            "AIGenerateResponse": {
+                "title": "AIGenerateResponse",
+                "required": [
+                    "raw"
+                ],
+                "type": "object",
+                "properties": {
+                    "raw": {
+                        "title": "Raw",
+                        "type": "object"
+                    }
+                }
+            },
+            "BatchEncodeRequest": {
+                "title": "BatchEncodeRequest",
+                "required": [
+                    "count"
+                ],
+                "type": "object",
+                "properties": {
+                    "count": {
+                        "title": "Count",
+                        "type": "integer"
+                    },
+                    "prefix": {
+                        "title": "Prefix",
+                        "type": "string"
+                    }
+                }
+            },
+            "BatchEncodeResponse": {
+                "title": "BatchEncodeResponse",
+                "required": [
+                    "tokens",
+                    "count"
+                ],
+                "type": "object",
+                "properties": {
+                    "tokens": {
+                        "title": "Tokens",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "count": {
+                        "title": "Count",
+                        "type": "integer"
+                    }
+                }
+            },
+            "ContentResponse": {
+                "title": "ContentResponse",
+                "required": [
+                    "type"
+                ],
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "title": "Type",
+                        "type": "string"
+                    },
+                    "content_id": {
+                        "title": "Content Id",
+                        "type": "string"
+                    },
+                    "title": {
+                        "title": "Title",
+                        "type": "string"
+                    },
+                    "body": {
+                        "title": "Body",
+                        "type": "string"
+                    },
+                    "shop": {
+                        "title": "Shop",
+                        "type": "object"
+                    }
+                }
+            },
+            "HTTPValidationError": {
+                "title": "HTTPValidationError",
+                "type": "object",
+                "properties": {
+                    "detail": {
+                        "title": "Detail",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        }
+                    }
+                }
+            },
+            "Token": {
+                "title": "Token",
+                "required": [
+                    "access_token"
+                ],
+                "type": "object",
+                "properties": {
+                    "access_token": {
+                        "title": "Access Token",
+                        "type": "string"
+                    },
+                    "token_type": {
+                        "title": "Token Type",
+                        "type": "string",
+                        "default": "bearer"
+                    }
+                }
+            },
+            "UserCreate": {
+                "title": "UserCreate",
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "title": "Email",
+                        "type": "string"
+                    },
+                    "password": {
+                        "title": "Password",
+                        "type": "string"
+                    }
+                }
+            },
+            "ValidationError": {
+                "title": "ValidationError",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "type": "object",
+                "properties": {
+                    "loc": {
+                        "title": "Location",
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        }
+                    },
+                    "msg": {
+                        "title": "Message",
+                        "type": "string"
+                    },
+                    "type": {
+                        "title": "Error Type",
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "OAuth2PasswordBearer": {
+                "type": "oauth2",
+                "flows": {
+                    "password": {
+                        "scopes": {},
+                        "tokenUrl": "/auth/token"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,194 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AllValue Link Admin - Mock</title>
+    <style>
+      body { font-family: Arial, sans-serif; padding: 24px; }
+      .card { border: 1px solid #ddd; padding: 16px; border-radius: 8px; max-width: 700px; margin: 12px auto; }
+      .hidden { display:none; }
+      table { width:100%; border-collapse: collapse; margin-top:12px;}
+      th,td { border:1px solid #eee; padding:8px; text-align:left }
+      .controls { display:flex; gap:8px; align-items:center }
+    </style>
+  </head>
+  <body>
+    <div id="login" class="card">
+      <h2>登录（Mock）</h2>
+      <input id="email" placeholder="邮箱" value="admin@example.com" style="width:100%;margin-bottom:8px;padding:8px"/>
+      <input id="password" type="password" placeholder="密码" value="password123" style="width:100%;margin-bottom:8px;padding:8px"/>
+      <div style="display:flex;gap:8px">
+        <button id="btnLogin">登录</button>
+        <button id="btnDemo">演示模式</button>
+      </div>
+      <div id="loginMsg" style="color:red;margin-top:8px"></div>
+    </div>
+
+    <div id="dashboard" class="card hidden">
+      <h2>控制面板 — 总控制台（Mock）</h2>
+      <p>欢迎，管理员。下面是你旗下商家概览：</p>
+      <table id="merchants" style="width:100%;margin-top:8px;border-collapse:collapse">
+        <thead><tr><th style="text-align:left">商家</th><th>今日访客</th><th>今日评价</th><th>操作</th></tr></thead>
+        <tbody>
+          <tr><td>商家 A</td><td>128</td><td>12</td><td><button class="btnView" data-id="shop-a">查看面板</button></td></tr>
+          <tr><td>商家 B</td><td>42</td><td>3</td><td><button class="btnView" data-id="shop-b">查看面板</button></td></tr>
+          <tr><td>商家 C</td><td>9</td><td>0</td><td><button class="btnView" data-id="shop-c">查看面板</button></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:12px">
+        <button id="btnCreateMerchant">创建商家</button>
+        <button id="btnLogoutDashboard" style="float:right">登出</button>
+      </div>
+    </div>
+
+    <div id="merchantPanel" class="card hidden">
+      <h2 id="mp-title">商家面板（Mock）</h2>
+      <div style="display:flex;gap:16px">
+        <div style="flex:1">
+          <h4>关键指标</h4>
+          <ul>
+            <li>今日访客: <span id="mp-visits">0</span></li>
+            <li>今日评价: <span id="mp-reviews">0</span></li>
+            <li>标签总数: <span id="mp-tags">0</span></li>
+          </ul>
+        </div>
+        <div style="flex:2">
+          <h4>访客明细（示例）</h4>
+          <table style="width:100%;border-collapse:collapse"><thead><tr><th>时间</th><th>设备</th><th>行为</th></tr></thead><tbody id="mp-rows"><tr><td>10:02</td><td>iPhone</td><td>打开页面</td></tr></tbody></table>
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <button id="btnBackToDash">返回控制台</button>
+        <button id="btnOpenNfcFlow" style="margin-left:8px">查看 NFC 用户流</button>
+      </div>
+    </div>
+
+    <div id="nfcUser" class="card hidden">
+      <h2>NFC 用户页面（Mock）</h2>
+      <p>请选择要分享/发布的平台、生成 AI 文案并可上传照片：</p>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <label><input type="checkbox" class="social" value="小红书"> 小红书</label>
+        <label><input type="checkbox" class="social" value="抖音"> 抖音</label>
+        <label><input type="checkbox" class="social" value="微信"> 微信</label>
+        <label><input type="checkbox" class="social" value="Instagram"> Instagram</label>
+      </div>
+      <div>
+        <textarea id="aiPrompt" rows="6" style="width:100%" placeholder="填写上下文或直接使用 AI 生成"></textarea>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+        <input type="file" id="photo" accept="image/*"/>
+        <button id="btnAiGen">AI 生成评价</button>
+        <button id="btnSubmitPost">提交并发布（Mock）</button>
+      </div>
+      <div id="aiResult" style="margin-top:12px;background:#f7f7f7;padding:8px;border-radius:4px;display:none">
+        <h4>生成结果</h4>
+        <div id="aiText"></div>
+        <div style="margin-top:8px">
+          <button id="btnOpenSocial">一键打开社媒（模拟）</button>
+          <button id="btnAuthApi" style="margin-left:8px">授权并代发（模拟）</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const login = document.getElementById('login');
+      const dashboard = document.getElementById('dashboard');
+      const btnLogin = document.getElementById('btnLogin');
+      const loginMsg = document.getElementById('loginMsg');
+      btnLogin.addEventListener('click', () => {
+        const email = document.getElementById('email').value;
+        const pwd = document.getElementById('password').value;
+        if (email === 'admin@example.com' && pwd === 'password123') {
+          login.classList.add('hidden');
+          dashboard.classList.remove('hidden');
+          loginMsg.textContent = '';
+          try { history.replaceState({}, '', '/dashboard'); } catch(e) {}
+        } else {
+          loginMsg.textContent = '登录失败（mock）';
+        }
+      });
+
+      document.getElementById('btnGen').addEventListener('click', () => {
+        const count = parseInt(document.getElementById('count').value) || 1;
+        const prefix = document.getElementById('prefix').value || '';
+        const tbody = document.querySelector('#tbl tbody');
+        tbody.innerHTML = '';
+      const tokens = [];
+      for (let i=0;i<count;i++){
+        const t = prefix + Math.random().toString(36).slice(2,10);
+        tokens.push(t);
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.textContent = t;
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+      }
+      document.getElementById('tbl').classList.remove('hidden');
+      // attach tokens for export
+      window.__mock_tokens = tokens;
+      });
+
+      document.getElementById('btnExport').addEventListener('click', () => {
+        const tokens = window.__mock_tokens || [];
+        if (!tokens.length) { alert('当前没有 token'); return; }
+        const blob = new Blob([tokens.join('\\n')], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'tokens.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      document.getElementById('btnLogoutDashboard').addEventListener('click', () => {
+        dashboard.classList.add('hidden');
+        login.classList.remove('hidden');
+        try { history.replaceState({}, '', '/'); } catch(e) {}
+      });
+  // new handlers: demo and dashboard navigation
+  document.getElementById('btnDemo').addEventListener('click', () => {
+    login.classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+    try { history.replaceState({}, '', '/dashboard'); } catch(e) {}
+  });
+  document.querySelectorAll('.btnView').forEach(b => {
+    b.addEventListener('click', (e) => {
+      const id = e.target.getAttribute('data-id');
+      document.getElementById('dashboard').classList.add('hidden');
+      document.getElementById('merchantPanel').classList.remove('hidden');
+      document.getElementById('mp-title').textContent = '商家面板（'+id+'）';
+      document.getElementById('mp-visits').textContent = Math.floor(Math.random()*300);
+      document.getElementById('mp-reviews').textContent = Math.floor(Math.random()*50);
+      document.getElementById('mp-tags').textContent = 120;
+    });
+  });
+  document.getElementById('btnBackToDash').addEventListener('click', () => {
+    document.getElementById('merchantPanel').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+  });
+  document.getElementById('btnOpenNfcFlow').addEventListener('click', () => {
+    document.getElementById('merchantPanel').classList.add('hidden');
+    document.getElementById('nfcUser').classList.remove('hidden');
+  });
+  document.getElementById('btnAiGen').addEventListener('click', () => {
+    const prompt = document.getElementById('aiPrompt').value || '默认生成文案';
+    // mock AI response
+    const aiText = '【AI生成】' + prompt + ' —— 优质体验分享，推荐收藏！';
+    document.getElementById('aiText').textContent = aiText;
+    document.getElementById('aiResult').style.display = 'block';
+  });
+  document.getElementById('btnSubmitPost').addEventListener('click', () => {
+    alert('已提交（Mock） — 如果已授权，系统会代发到所选社媒。');
+  });
+  document.getElementById('btnOpenSocial').addEventListener('click', () => {
+    alert('模拟打开社媒应用（Mock）。');
+  });
+  document.getElementById('btnAuthApi').addEventListener('click', () => {
+    alert('模拟 OAuth 授权流程（Mock）。');
+  });
+    </script>
+  </body>
+</html>
+
+

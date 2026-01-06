@@ -1,0 +1,63 @@
+Running Playwright tests in C:\Users\Administrator\Desktop\nfc\admin_frontend\e2e
+
+Running 2 tests using 2 workers
+
+(node:16308) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:19064) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:19064) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:16308) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 tests\dashboard.spec.ts:3:5 › login -> dashboard -> open merchant panel (5.2s)
+  x  2 tests\login.spec.ts:3:5 › login and navigate to tags (5.2s)
+
+
+  1) tests\dashboard.spec.ts:3:5 › login -> dashboard -> open merchant panel ───────────────────────
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/dashboard/[39m
+    Received string:  [31m"http://localhost:5173/"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    9 × unexpected value "http://localhost:5173/"[22m
+
+
+       7 |   await page.fill('input[placeholder="密码"]', 'password123');
+       8 |   await page.click('button:has-text("登录")');
+    >  9 |   await expect(page).toHaveURL(/\/dashboard/);
+         |                      ^
+      10 |   await expect(page.locator('text=控制面板')).toBeVisible();
+      11 |   // click first 查看 button
+      12 |   const btn = page.locator('button:has-text("查看")').first();
+        at C:\Users\Administrator\Desktop\nfc\admin_frontend\e2e\tests\dashboard.spec.ts:9:22
+
+  2) tests\login.spec.ts:3:5 › login and navigate to tags ──────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/dashboard/[39m
+    Received string:  [31m"http://localhost:5173/"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    9 × unexpected value "http://localhost:5173/"[22m
+
+
+       8 |   await page.click('button:has-text(\"登录\")');
+       9 |   // after login mock will update URL to /dashboard
+    > 10 |   await expect(page).toHaveURL(/\/dashboard/);
+         |                      ^
+      11 |   await expect(page.locator('text=标签批量生成')).toBeVisible();
+      12 | });
+      13 |
+        at C:\Users\Administrator\Desktop\nfc\admin_frontend\e2e\tests\login.spec.ts:10:22
+
+  2 failed
+    tests\dashboard.spec.ts:3:5 › login -> dashboard -> open merchant panel ────────────────────────
+    tests\login.spec.ts:3:5 › login and navigate to tags ───────────────────────────────────────────

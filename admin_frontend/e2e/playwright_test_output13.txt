@@ -1,0 +1,21 @@
+Running Playwright tests in C:\Users\Administrator\Desktop\nfc\admin_frontend\e2e
+SyntaxError: C:\Users\Administrator\Desktop\nfc\admin_frontend\e2e\tests\dashboard.spec.ts: Unexpected token (13:46)
+
+  11 |   const btn = page.locator('button:has-text("查看")').first();
+  12 |   await btn.click();
+> 13 |   await expect(page).toHaveURL(/\/merchant\\//);
+     |                                               ^
+  14 |   await expect(page.locator('text=最近访客')).toBeVisible();
+  15 | });
+  16 |
+
+   at dashboard.spec.ts:13
+
+  11 |   const btn = page.locator('button:has-text("查看")').first();
+  12 |   await btn.click();
+> 13 |   await expect(page).toHaveURL(/\/merchant\\//);
+     |                                              ^
+  14 |   await expect(page.locator('text=最近访客')).toBeVisible();
+  15 | });
+  16 |
+

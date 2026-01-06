@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>视觉烟雾测试报告</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body{font-family:Inter,system-ui,Segoe UI,Helvetica,Arial;line-height:1.4;margin:20px;color:#111}
+    h1,h2{color:#0b64b6}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+    .card{border:1px solid #e6eef9;border-radius:8px;padding:12px;background:#fff}
+    img{width:100%;height:auto;border-radius:4px;border:1px solid #ddd}
+    .meta{font-size:13px;color:#444;margin-top:8px}
+  </style>
+</head>
+<body>
+  <h1>视觉烟雾测试 —— 快速报告</h1>
+  <p>位置：<code>admin_frontend/e2e/visual-screenshots/</code>。下面为 Playwright 在本地采集的截图（full page）。</p>
+
+  <div class="grid">
+    <div class="card">
+      <h2>仪表盘（dashboard）</h2>
+      <img src="./visual-screenshots/chromium-dashboard.png" alt="dashboard" />
+      <div class="meta">浏览器: Chromium — 文件: <code>chromium-dashboard.png</code></div>
+    </div>
+
+    <div class="card">
+      <h2>标签管理（tags）</h2>
+      <img src="./visual-screenshots/chromium-tags.png" alt="tags" />
+      <div class="meta">浏览器: Chromium — 文件: <code>chromium-tags.png</code></div>
+    </div>
+
+    <div class="card">
+      <h2>商家面板（merchant）</h2>
+      <img src="./visual-screenshots/chromium-merchant.png" alt="merchant" />
+      <div class="meta">浏览器: Chromium — 文件: <code>chromium-merchant.png</code></div>
+    </div>
+
+    <div class="card">
+      <h2>NFC 用户页（token）</h2>
+      <img src="./visual-screenshots/chromium-token.png" alt="token" />
+      <div class="meta">浏览器: Chromium — 文件: <code>chromium-token.png</code></div>
+    </div>
+  </div>
+
+  <h2>快速结论</h2>
+  <ul>
+    <li>截图已成功生成，无页面崩溃或空白（若出现空白请检查后端 mock 或本地 server）。</li>
+    <li>建议对比基线（reference）进行视觉回归，如需我可以生成基线并提差异截图。</li>
+  </ul>
+
+  <p class="meta">生成时间（本机）：请查看 Playwright 测试输出与截图文件的时间戳。</p>
+</body>
+</html>
+
+

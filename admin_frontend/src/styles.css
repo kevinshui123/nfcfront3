@@ -1,0 +1,2021 @@
+:root{
+  --bg: #ffffff;
+  --card-bg: #fbfcfe;
+  --muted: #6b7280;
+  --primary: #1890ff;
+  --primary-600: #096dd9;
+  --kpi-bg: linear-gradient(135deg, rgba(24,144,255,0.08), rgba(105,89,255,0.04));
+  --kpi-border: rgba(16,24,40,0.06);
+  --glass-border: rgba(255,255,255,0.6);
+  --surface: #f8fafc;
+  --text: #111827;
+  --muted-2: #9ca3af;
+  --gap: 16px;
+  --radius: 8px;
+  --container-max: 1100px;
+}
+/* decorative brush font for brand + modern UI font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Ma+Shan+Zheng&display=swap');
+
+/* dark theme overrides */
+:root[data-theme="dark"], [data-theme="dark"] {
+  --bg: #0b1220;
+  --card-bg: #071224;
+  --muted: #93a4b8;
+  --primary: #56a6ff;
+  --primary-600: #2f85ff;
+  --surface: #071423;
+  --text: #e6eef9;
+  --muted-2: #7f93a9;
+}
+html,body,#root{
+  height:100%;
+  margin:0;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+.app-container{
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 16px;
+}
+.ant-card{
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border, rgba(0,0,0,0.06));
+}
+/* login hero background */
+.login-hero{
+  background: linear-gradient(180deg, rgba(10,102,255,0.06) 0%, rgba(255,255,255,0) 40%);
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+.login-hero .ant-card{
+  box-shadow: 0 8px 30px rgba(15,23,42,0.06);
+  padding: 20px;
+}
+/* global header */
+.app-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 12px 18px;
+  background: linear-gradient(90deg, rgba(24,144,255,0.06), rgba(9,109,217,0.02));
+  border-bottom: 1px solid rgba(15,23,42,0.03);
+  margin-bottom: 16px;
+}
+
+/* NFC page richer styling (appended) */
+.nfc-hero {
+  padding: 22px;
+  border-radius: 14px;
+  /* main background kept as before, but moved into a variable so we can layer a gradient border */
+  --main-bg: linear-gradient(180deg, rgba(6,12,22,0.75), rgba(8,14,22,0.6));
+  --border-angle: 0turn;
+  --gradient-border: conic-gradient(from var(--border-angle), transparent 20%, #2f85ff 5%, #b893ff 40%, #ff6fa3 70%, transparent 99%);
+  border: 6px solid transparent;
+  background:
+    /* padding-box: fill element excluding border */
+    var(--main-bg) padding-box,
+    /* border-box: gradient that occupies the border area */
+    var(--gradient-border) border-box,
+    /* duplicate main background behind gradient border to avoid "cut-out" look */
+    var(--main-bg) border-box;
+  background-position: center center;
+  box-shadow: 0 20px 60px rgba(2,6,23,0.6);
+  animation: border-spin 7s linear infinite;
+}
+
+@keyframes border-spin {
+  to { --border-angle: 1turn; }
+}
+
+/* Pause the border animation on hover to reduce motion */
+.nfc-hero:hover { animation-play-state: paused; }
+
+/* Register the custom property so angle animations interpolate smoothly */
+@property --border-angle {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0turn;
+}
+
+/* Apply the same animated gradient border to publish page hero too.
+   This rule is placed after other .publish-hero/.nfc-hero rules to ensure it overrides them. */
+.nfc-hero, .publish-hero {
+  --border-width: 6px;
+  position: relative;
+  border-radius: 14px;
+  background: var(--main-bg, linear-gradient(180deg, rgba(6,12,22,0.75), rgba(8,14,22,0.6))) padding-box;
+  z-index: 0;
+  overflow: visible;
+}
+
+.nfc-hero::after, .publish-hero::after {
+  position: absolute;
+  content: "";
+  top: calc(-1 * var(--border-width));
+  left: calc(-1 * var(--border-width));
+  z-index: -1;
+  width: calc(100% + var(--border-width) * 2);
+  height: calc(100% + var(--border-width) * 2);
+  background: linear-gradient(
+    60deg,
+    hsl(224, 85%, 66%),
+    hsl(269, 85%, 66%),
+    hsl(314, 85%, 66%),
+    hsl(359, 85%, 66%),
+    hsl(44, 85%, 66%),
+    hsl(89, 85%, 66%),
+    hsl(134, 85%, 66%),
+    hsl(179, 85%, 66%)
+  );
+  background-size: 300% 300%;
+  border-radius: inherit;
+  animation: moveGradient 4s alternate infinite;
+}
+
+@keyframes moveGradient {
+  50% { background-position: 100% 50%; }
+}
+
+.nfc-hero:hover::after, .publish-hero:hover::after { animation-play-state: paused; }
+.nfc-card h2 {
+  font-size: 30px;
+  margin: 0 0 10px 0;
+  font-weight: 800;
+  font-family: 'Ma Shan Zheng', 'Inter', serif;
+  font-style: italic;
+  letter-spacing: 0.6px;
+  background: linear-gradient(90deg, #7fb8ff 0%, #b893ff 55%, #ff9cc0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 6px 20px rgba(0,0,0,0.35);
+}
+.nfc-card p { margin: 0 0 12px 0; color: rgba(220,230,245,0.85) }
+.platform-grid { gap: 10px; display:flex; flex-wrap:wrap; }
+.platform-chip {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.03);
+  color: rgba(230,238,249,0.9);
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 180ms ease, background 180ms ease;
+  margin-right:8px;
+}
+.platform-chip.selected {
+  background: linear-gradient(90deg, rgba(86,166,255,0.12), rgba(185,147,255,0.08));
+  box-shadow: 0 10px 30px rgba(9,109,217,0.08);
+  border-color: rgba(86,166,255,0.18);
+  transform: translateY(-4px);
+}
+.nfc-card .ui-btn { margin-top: 6px; }
+.nfc-card .ui-btn-primary { background: linear-gradient(90deg,var(--primary),var(--primary-600)); color: white; }
+.nfc-card .ant-btn { border-radius: 10px; }
+.nfc-card .ant-upload-list { display: none; }
+.nfc-card img { max-width: 240px; border-radius: 8px; margin-left: 8px; }
+
+@media (max-width: 600px) {
+  .nfc-card h2 { font-size: 20px; }
+  .nfc-hero { padding: 14px; }
+  .platform-chip { padding: 8px 10px; font-size: 14px; }
+}
+
+/* Light-theme NFC enhancements: ensure chips visible and add subtle animated background */
+:root:not([data-theme="dark"]) .nfc-hero {
+  /* blue-white gradient with soft animated bands to match brand */
+  background: linear-gradient(180deg, #e6f8ff 0%, #f3fbff 48%, #ffffff 100%);
+  position: relative;
+  overflow: hidden;
+}
+:root:not([data-theme="dark"]) .nfc-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* layered blue/teal soft lights */
+  background-image: radial-gradient(900px 260px at 10% 12%, rgba(86,166,255,0.12), transparent 12%),
+                    radial-gradient(700px 200px at 88% 88%, rgba(110,231,183,0.06), transparent 12%),
+                    radial-gradient(1200px 260px at 50% 0%, rgba(24,144,255,0.02), transparent 10%);
+  filter: blur(36px);
+  transform: translateX(-24%);
+  animation: nfcLightDrift 20s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes nfcLightDrift {
+  0% { transform: translateX(-24%) rotate(-4deg); opacity: 0.96; }
+  50% { transform: translateX(24%) rotate(-2deg); opacity: 0.96; }
+  100% { transform: translateX(-24%) rotate(-4deg); opacity: 0.96; }
+}
+:root:not([data-theme="dark"]) .nfc-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,251,255,0.85));
+  border: 1px solid rgba(9,109,217,0.06);
+  z-index: 1;
+}
+
+/* Multi-step flow: step transitions and mobile first styles */
+.nfc-hero .step { transition: all 420ms cubic-bezier(.2,.9,.2,1); }
+.nfc-hero .step-1, .nfc-hero .step-2, .nfc-hero .step-3 { opacity: 1; transform: translateY(0); }
+.nfc-hero .platform-chip .chip-inner { display:flex; gap:8px; align-items:center; padding:6px 8px; }
+.nfc-hero .chip-icon { font-size:18px; display:inline-block; width:22px; text-align:center; }
+.nfc-hero .chip-label { font-weight:600; font-size:14px; }
+.nfc-hero .platform-grid { display:flex; gap:10px; flex-wrap:wrap; }
+.nfc-hero .platform-chip { transition: transform 220ms ease, box-shadow 220ms ease, background 180ms ease; padding:10px 14px; border-radius:999px; }
+.nfc-hero .platform-chip.selected { transform: scale(1.03); box-shadow: 0 10px 30px rgba(9,109,217,0.08); }
+.nfc-hero .ui-btn { min-width: 120px; }
+.nfc-hero .ui-btn.ui-btn-primary { min-width: 160px; }
+
+@media (max-width:420px) {
+  .nfc-hero { padding: 12px; }
+  .nfc-hero .ui-btn { min-width: 96px; font-size: 14px; padding:8px 10px; }
+  .nfc-hero .platform-chip { padding:8px 10px; font-size: 13px; }
+  .nfc-hero .chip-label { font-size: 13px; }
+}
+
+/* Ensure mobile CTAs are full width and stacked */
+@media (max-width: 520px) {
+  .nfc-hero .ui-btn, .nfc-hero .ui-btn.ui-btn-primary {
+    width: 100% !important;
+    display: block !important;
+    box-sizing: border-box !important;
+  }
+  .nfc-hero .platform-grid { display:flex; flex-direction:column; gap:8px; }
+  .nfc-hero .platform-chip { width: 100%; justify-content: flex-start; }
+}
+
+/* Full CTA */
+.full-cta {
+  padding: 12px 18px !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 12px 36px rgba(9,109,217,0.14) !important;
+  background: linear-gradient(90deg, #66b0ff, #2f85ff) !important;
+  color: #04122a !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  white-space: nowrap !important;
+}
+
+/* center inner content & make chips look nicer */
+.nfc-inner { display:block; padding-bottom: 6px; }
+.nfc-inner { padding-top: 18px; }
+.platform-chip { display:flex; align-items:center; gap:12px; padding: 12px 16px; border-radius: 14px; background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.02); }
+.platform-chip .chip-icon { width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; font-size:18px; background: rgba(255,255,255,0.02); border-radius:8px; }
+.platform-chip .chip-label { font-weight:700; color:var(--text); }
+.platform-chip svg { display:block; width:22px; height:22px; }
+.platform-chip .chip-icon { background: transparent; padding:0; }
+.platform-chip.selected { transform: translateY(-4px); box-shadow: 0 14px 40px rgba(9,109,217,0.08); border-color: rgba(86,166,255,0.18); background: linear-gradient(90deg, rgba(86,166,255,0.06), rgba(185,147,255,0.03)); }
+
+/* step box centering */
+.nfc-hero .step { display:block; margin: 0 auto; max-width: 640px; width: 100%; }
+.nfc-hero .step .nfc-card { width: 100%; box-sizing: border-box; }
+/* Ensure inner step panels (AI result, progress) fill the card width like Choose Platform */
+.nfc-hero .step .ai-progress,
+.nfc-hero .step .ai-progress-track,
+.nfc-hero .step > div,
+.nfc-hero .step .nfc-inner,
+.nfc-hero .step .platform-grid {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+.nfc-hero .step .ai-progress { padding: 0 !important; }
+/* Override inline max-width on ai progress and any inline width limits */
+.nfc-hero .step .ai-progress,
+.nfc-hero .step .ai-progress * {
+  max-width: 100% !important;
+  width: 100% !important;
+}
+/* Ensure the card itself is the full intended width */
+.nfc-hero > .ant-card,
+.nfc-hero .nfc-card,
+.nfc-hero .ant-card.ant-card-bordered {
+  width: 100% !important;
+  max-width: 640px !important;
+  margin: 0 auto !important;
+  box-sizing: border-box !important;
+}
+/* Make sure inner padded containers expand to full card width */
+.nfc-hero .ant-card-body > div,
+.nfc-hero .step > div,
+.nfc-hero .nfc-inner {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+.nfc-card { padding: 18px !important; border-radius: 14px; }
+
+/* chip image */
+.chip-img { width: 28px; height: 28px; border-radius: 6px; object-fit: cover; display: inline-block; box-shadow: 0 6px 18px rgba(2,6,23,0.18); }
+
+/* step in animation */
+.nfc-hero .step { animation: stepIn 420ms cubic-bezier(.2,.9,.2,1) both; }
+@keyframes stepIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.995); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ambient particle background for nfc hero */
+.nfc-particles { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.nfc-particles .particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(86,166,255,0.95) 0%, rgba(86,166,255,0.45) 40%, rgba(86,166,255,0.02) 100%);
+  opacity: 0.9;
+  transform: translate3d(0,0,0);
+  filter: blur(6px);
+  will-change: transform, opacity;
+  animation: floatParticle linear infinite;
+}
+.nfc-particles .particle:nth-child(1){ left:6%; top:18%; animation-duration:22s; animation-delay:0s; width:10px; height:10px; }
+.nfc-particles .particle:nth-child(2){ left:24%; top:8%; animation-duration:18s; animation-delay:2s; width:6px; height:6px; }
+.nfc-particles .particle:nth-child(3){ left:42%; top:24%; animation-duration:26s; animation-delay:4s; width:8px; height:8px; }
+.nfc-particles .particle:nth-child(4){ left:60%; top:6%; animation-duration:20s; animation-delay:6s; width:6px; height:6px; }
+.nfc-particles .particle:nth-child(5){ left:78%; top:18%; animation-duration:24s; animation-delay:8s; width:9px; height:9px; }
+.nfc-particles .particle:nth-child(6){ left:12%; top:64%; animation-duration:28s; animation-delay:3s; width:7px; height:7px; }
+.nfc-particles .particle:nth-child(7){ left:34%; top:72%; animation-duration:32s; animation-delay:5s; width:5px; height:5px; }
+.nfc-particles .particle:nth-child(8){ left:56%; top:60%; animation-duration:26s; animation-delay:7s; width:8px; height:8px; }
+.nfc-particles .particle:nth-child(9){ left:80%; top:72%; animation-duration:30s; animation-delay:9s; width:6px; height:6px; }
+.nfc-particles .particle:nth-child(10){ left:90%; top:42%; animation-duration:34s; animation-delay:1s; width:10px; height:10px; }
+
+@keyframes floatParticle {
+  0% { transform: translateY(0) translateX(0) scale(1); opacity: 0.85; }
+  50% { transform: translateY(-24px) translateX(6px) scale(1.08); opacity: 0.6; }
+  100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.85; }
+}
+
+/* ensure card content sits above particles */
+.nfc-hero > .nfc-particles + .ant-card, .nfc-hero .nfc-card { position: relative; z-index: 2; }
+
+/* Publish page styling */
+.publish-hero {
+  padding: 18px;
+  border-radius: 14px;
+  /* glass/frosted look */
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  box-shadow: 0 20px 60px rgba(2,6,23,0.45);
+  border: 1px solid rgba(255,255,255,0.04);
+  color: var(--text);
+}
+.publish-hero h2 { font-size: 20px; margin: 0; font-weight: 800; color: var(--text); }
+.publish-hero .ant-btn {
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+.publish-hero .ant-btn:hover { transform: translateY(-4px); box-shadow: 0 18px 40px rgba(12,20,30,0.12); }
+
+/* center publish page vertically */
+.publish-page { display:flex; align-items:center; justify-content:center; min-height:60vh; }
+
+/* Minimal, high-tech publish CTA */
+.publish-hero.minimal {
+  /* minimal glass variant */
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius: 14px;
+  padding: 28px;
+  border: 1px solid rgba(255,255,255,0.04);
+  box-shadow: 0 18px 48px rgba(2,6,23,0.4);
+}
+.publish-hero::after {
+  /* disable colorful ::after gradient applied to nfc/publish general rule */
+  background: none !important;
+  animation: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+.publish-hero .publish-cta::before {
+  /* remove the colorful rotating halo for a cleaner glass look */
+  background: none !important;
+  opacity: 0 !important;
+  filter: none !important;
+  animation: none !important;
+}
+.publish-cta-dot {
+  /* simpler, subtle accent instead of bright gradient */
+  background: linear-gradient(90deg, #66b0ff 0%, #2f85ff 100%) !important;
+}
+.publish-cta {
+  width: 220px;
+  height: 64px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(10,12,18,0.96), rgba(16,22,32,0.96));
+  border: none;
+  position: relative;
+  overflow: visible;
+  box-shadow: 0 26px 80px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+  transition: transform 260ms cubic-bezier(.2,.9,.2,1), box-shadow 260ms cubic-bezier(.2,.9,.2,1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.publish-cta::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 18px;
+  background: conic-gradient(from 0deg, rgba(86,166,255,0.16), rgba(185,147,255,0.14), rgba(110,231,183,0.12), rgba(86,166,255,0.16));
+  filter: blur(20px);
+  opacity: 0.95;
+  z-index: -2;
+  transition: opacity 260ms ease, transform 9000ms linear;
+  will-change: transform;
+  animation: rotateBorder 9s linear infinite;
+}
+.publish-cta::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  background: radial-gradient(circle, rgba(255,255,255,0.9), rgba(255,255,255,0.15));
+  opacity: 0;
+  transition: opacity 320ms ease, transform 320ms ease;
+}
+.publish-cta-dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: block;
+  background: linear-gradient(90deg, #66b0ff 0%, #b893ff 60%, #6ee7b7 100%);
+  box-shadow: 0 10px 36px rgba(102,176,255,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
+  transform: translateZ(0);
+}
+.publish-cta-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  display: block;
+  box-shadow: 0 12px 40px rgba(12,18,30,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
+  transform: translateZ(0);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.publish-cta-wrap { display:flex; flex-direction:column; align-items:center; gap:8px; }
+.publish-caption {
+  color: rgba(230,238,249,0.8);
+  font-size: 13px;
+  text-align: center;
+  margin-top: 4px;
+  opacity: 0.95;
+}
+.publish-fallback-link a {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: none;
+  background: transparent;
+  padding: 6px 10px;
+  border-radius: 10px;
+  display: inline-block;
+}
+.publish-fallback-link a:hover { text-decoration: underline; }
+
+/* ephemeral particles used by anime.js (DOM) */
+.ephemeral-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 6px;
+  pointer-events: none;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35), 0 0 18px rgba(102,176,255,0.12);
+  mix-blend-mode: screen;
+  opacity: 0.95;
+  transform-origin: center;
+}
+
+.nfc-hero { position: relative; overflow: visible; }
+
+/* Ensure card body allows overflow (smoky heading may animate outwards) */
+.nfc-card .ant-card-body, .nfc-hero .ant-card-body {
+  overflow: visible !important;
+  padding-top: 28px !important;
+}
+
+/* Slightly reduce smoky heading size in AI generated step to avoid clipping */
+.nfc-hero .step-2 .smoky-heading {
+  font-size: clamp(16px, 4.2vw, 36px) !important;
+  line-height: 1 !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* Step action buttons: ensure Take Photo and AI Generate share same sizes/order */
+.nfc-hero .step-actions { display:flex; gap:12px; justify-content:center; align-items:center; }
+/* Apply reduced/smaller sizing only to AI Generated (step-2) actions */
+.nfc-hero .step-2 .neon-btn { padding: 8px 20px !important; min-width: 120px !important; font-size: 13px !important; letter-spacing: 2px !important; }
+.nfc-hero .step-2 .ui-btn { min-width: 120px !important; padding: 8px 18px !important; font-size: 13px !important; }
+.nfc-hero .step-2 .neon-btn span { height: 2px !important; }
+.publish-cta:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 32px 80px rgba(16,24,40,0.6);
+}
+.publish-cta:hover::after { opacity: 0.12; transform: translate(-50%, -50%) scale(18); }
+.publish-cta:focus { outline: none; box-shadow: 0 36px 90px rgba(24,144,255,0.18); }
+
+@media (max-width:420px) {
+  .publish-cta { width: 88%; height: 56px; }
+}
+
+@keyframes rotateBorder {
+  0% { transform: rotate(0deg) }
+  100% { transform: rotate(360deg) }
+}
+
+/* AI progress styles */
+.ai-progress { display:block; }
+.ai-progress-track {
+  height: 14px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+}
+.ai-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, rgba(102,176,255,0.9), rgba(185,147,255,0.9));
+  box-shadow: 0 8px 30px rgba(102,176,255,0.14);
+  transition: width 320ms linear;
+  position: relative;
+}
+.ai-progress-fill::after {
+  content: "";
+  position: absolute;
+  right: -60px;
+  top: -30px;
+  width: 120px;
+  height: 60px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02), rgba(255,255,255,0.12));
+  transform: skewX(-20deg);
+  filter: blur(12px);
+  opacity: 0.6;
+  animation: shimmer 2.4s linear infinite;
+}
+.ai-progress-meta { display:flex; justify-content:space-between; align-items:center; margin-top:8px; color: rgba(230,238,249,0.78); font-size:13px; }
+.ai-progress-percent { font-weight:700; min-width:44px; text-align:left; color:var(--primary); }
+.ai-progress-note { opacity:0.9; margin-left:8px; flex:1; text-align:right; color: rgba(230,238,249,0.68) }
+.ai-progress-meta {
+  /* enforce horizontal layout and prevent vertical text stacking */
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  white-space: nowrap !important;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  gap: 8px !important;
+}
+.ai-progress-note {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  text-align: right !important;
+}
+
+@keyframes shimmer {
+  0% { right: -60px; opacity: 0.2 }
+  50% { right: 20px; opacity: 0.9 }
+  100% { right: -60px; opacity: 0.2 }
+}
+
+/* three.js canvas holder for NFC background */
+.nfc-three-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* ensure card sits above 3d background */
+.nfc-hero > .ant-card, .nfc-hero .nfc-card { position: relative; z-index: 3; }
+
+/* Tubes background canvas (global) */
+.tubes-root { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.tubes-canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* ensure app content sits above the tubes canvas */
+#root, html, body, .app-container { position: relative; z-index: 2; }
+
+/* Fallback animated gradient for tubes background (visible even if CDN fails) */
+.tubes-root {
+  background: radial-gradient(800px 400px at 10% 20%, rgba(86,166,255,0.10), transparent 12%),
+              radial-gradient(800px 400px at 90% 80%, rgba(185,147,255,0.06), transparent 12%),
+              linear-gradient(180deg, rgba(6,12,22,0.95), rgba(6,12,22,0.96));
+  background-blend-mode: screen, screen, normal;
+  animation: tubesGradientMove 14s linear infinite;
+  will-change: background-position;
+}
+.tubes-canvas { background: transparent; }
+
+@keyframes tubesGradientMove {
+  0% { background-position: 0% 0%, 0% 0%, 0% 0%; }
+  50% { background-position: 40% 10%, 60% 90%, 0% 0%; }
+  100% { background-position: 0% 0%, 0% 0%, 0% 0%; }
+}
+
+/* neural canvas styles */
+.neural-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+  background: transparent;
+}
+
+/* fallback animated gradient for neural root */
+.neural-root {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(800px 400px at 10% 20%, rgba(102,118,234,0.09), transparent 12%),
+              radial-gradient(800px 400px at 90% 80%, rgba(240,147,251,0.05), transparent 12%),
+              linear-gradient(180deg, rgba(6,12,22,0.96), rgba(6,12,22,0.98));
+  background-blend-mode: screen, screen, normal;
+  animation: neuralGradientMove 16s linear infinite;
+}
+.neural-root::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 50% 10%, rgba(255,255,255,0.02), transparent 12%);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+@keyframes neuralGradientMove {
+  0% { background-position: 0% 0%, 0% 0%, 0% 0% }
+  50% { background-position: 30% 20%, 70% 80%, 0% 0% }
+  100% { background-position: 0% 0%, 0% 0%, 0% 0% }
+}
+
+/* logo container placed at top center, not shown on dashboard due to LogoHeader logic */
+#logo {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(48vw, 420px);
+  height: calc(min(48vw, 420px) * 0.2);
+  pointer-events: none;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+#logo canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#logo .logo-text {
+  display: block;
+  text-align: center;
+  margin-top: 6px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 6px 18px rgba(0,0,0,0.6);
+  pointer-events: none;
+}
+
+/* smaller default logo sizing */
+/* removed #logo styles (logo removed) */
+
+/* Apply glass font + button styles to all pages except dashboard */
+body:not(.is-dashboard) {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body:not(.is-dashboard) .ant-btn,
+body:not(.is-dashboard) .glass-button {
+  position: relative;
+  padding: 12px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #fff;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+  border-radius: 40px;
+  border: 1.5px solid rgba(255,255,255,0.04);
+  backdrop-filter: blur(18px) saturate(140%);
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.28),
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 -1px 0 rgba(255,255,255,0.02);
+  transition: all 260ms cubic-bezier(.2,.9,.2,1);
+  overflow: hidden;
+}
+
+body:not(.is-dashboard) .ant-btn:hover,
+body:not(.is-dashboard) .glass-button:hover {
+  transform: translateY(-3px) scale(1.02);
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
+  box-shadow:
+    0 14px 44px rgba(24,24,48,0.48),
+    0 0 80px rgba(102,118,234,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+body:not(.is-dashboard) h1, body:not(.is-dashboard) h2 {
+  font-weight: 800;
+  color: #fff;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 8px 30px rgba(0,0,0,0.6);
+}
+
+body:not(.is-dashboard) h1 {
+  font-size: clamp(2rem, 6.5vw, 5rem);
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 50%, #ffffff 100%);
+  filter: drop-shadow(0 0 40px rgba(255,255,255,0.22));
+}
+
+body:not(.is-dashboard) .tagline,
+body:not(.is-dashboard) .lead {
+  color: rgba(255,255,255,0.9);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* Make sure ant primary buttons keep good contrast */
+body:not(.is-dashboard) .ant-btn-primary {
+  background: linear-gradient(90deg, var(--primary), var(--primary-600));
+  border: none;
+  color: #04122a;
+  box-shadow: 0 10px 30px rgba(9,109,217,0.12);
+}
+
+/* shimmer heading style (from user) scoped to non-dashboard pages */
+body:not(.is-dashboard) .shimmer {
+	--base-color: #6b21a8;
+	--shimmer-color: #ff5ac4;
+	--shimmer-width: 25%;
+	--duration: 2.2s;
+
+	font-size: clamp(1.6rem, 4.5vw, 3.2rem);
+	font-weight: 800;
+	line-height: 1;
+	letter-spacing: -0.02em;
+	background: linear-gradient(
+		90deg,
+		var(--base-color) 0%,
+		var(--shimmer-color) calc(50% + var(--shimmer-width) / 2),
+		var(--base-color) 100%
+	);
+	background-size: 200% 100%;
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+	-webkit-text-fill-color: transparent;
+	animation: shimmer var(--duration) linear infinite;
+	text-shadow: 0 1px 0 rgba(0,0,0,0.3);
+}
+
+@keyframes shimmer {
+	0%   { background-position: 100% 0; }
+	100% { background-position: -100% 0; }
+}
+
+/* fallback if background-clip not supported */
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+	body:not(.is-dashboard) .shimmer {
+		color: var(--base-color);
+		background: none;
+		-webkit-text-fill-color: initial;
+		text-shadow:
+			0 0 0 rgba(0,0,0,0),
+			0 0 20px rgba(255,90,180,0.06);
+	}
+}
+
+/* Animated stroke text for headings */
+.stroke-text { width: 100%; height: 64px; overflow: visible; display: block; }
+.stroke-text text {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 1200;
+  transition: stroke-dashoffset 0.9s cubic-bezier(.2,.9,.2,1), fill 0.6s ease 0.9s;
+}
+.stroke-text.running text {
+  stroke-dashoffset: 0;
+  fill: white;
+}
+
+/* Smoky text effect (per-user snippet adapted to plain CSS + per-char delays) */
+@import url("https://fonts.googleapis.com/css?family=Finger+Paint&display=swap");
+
+.smoky-root {
+  pointer-events: none;
+}
+.smoky-heading {
+  background: transparent;
+  color: transparent;
+  font-size: clamp(18px, 5vw, 48px);
+  line-height: 1;
+  white-space: nowrap;
+}
+.smoky-char {
+  display: inline-block;
+  color: transparent;
+  text-shadow: 0 0 0 whitesmoke;
+  /* start delay is applied inline per-char (3s + index/6s) */
+  animation-name: smoky;
+  /* increased duration so the smoky cycle is slower and less frequent */
+  animation-duration: 3.6s;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: both;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  backface-visibility: hidden;
+}
+.smoky-char:nth-child(even) {
+  animation-name: smoky-mirror;
+}
+
+@keyframes smoky {
+  60% {
+    text-shadow: 0 0 40px whitesmoke;
+  }
+  to {
+    transform:
+      translate3d(15rem,-8rem,0)
+      rotate(-40deg)
+      skewX(70deg)
+      scale(1.5);
+    text-shadow: 0 0 20px whitesmoke;
+    opacity: 0;
+  }
+}
+
+@keyframes smoky-mirror {
+  60% {
+    text-shadow: 0 0 40px whitesmoke;
+  }
+  to {
+    transform:
+      translate3d(18rem,-8rem,0)
+      rotate(-40deg)
+      skewX(-70deg)
+      scale(2);
+    text-shadow: 0 0 20px whitesmoke;
+    opacity: 0;
+  }
+}
+/* Page-level centering for NFC flow: center main module on small screens */
+.nfc-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding-top: 24px; padding-bottom: 24px; box-sizing: border-box; }
+.nfc-page .nfc-hero { width: 100%; max-width: 640px; margin: 0 auto; }
+
+/* Force modules to center and take intended size on all viewports */
+.nfc-page, .publish-page {
+  min-height: 100vh !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.nfc-page .nfc-hero, .publish-page .publish-hero {
+  margin: 0 auto !important;
+  align-self: center !important;
+  width: 100% !important;
+  max-width: 640px !important;
+  box-sizing: border-box !important;
+}
+.nfc-page .nfc-card, .publish-page .publish-hero {
+  margin: 0 auto !important;
+  min-height: 420px !important;
+}
+
+@media (max-width: 520px) {
+  .nfc-page .nfc-hero, .publish-page .publish-hero {
+    padding: 12px !important;
+    max-width: 92% !important;
+  }
+  .nfc-page .nfc-card, .publish-page .publish-hero {
+    min-height: auto !important;
+  }
+}
+.nfc-page .nfc-card { margin: 0 auto; transform: translateY(-2px); transition: transform 320ms ease, box-shadow 320ms ease; box-shadow: 0 20px 60px rgba(2,6,23,0.45); }
+.nfc-page .nfc-card:hover { transform: translateY(-8px); box-shadow: 0 34px 90px rgba(2,6,23,0.6); }
+
+/* Mobile-specific: center vertically, larger CTAs, reduce particle prominence */
+@media (max-width: 520px) {
+  .nfc-page { align-items: center; padding-top: 24px; padding-bottom: 24px; }
+  .nfc-hero { padding: 12px; border-radius: 12px; margin: 0 12px; }
+  .nfc-card { padding: 18px !important; }
+  .full-cta { padding: 14px !important; border-radius: 12px !important; font-size: 16px !important; }
+  .platform-chip { padding: 12px 14px !important; font-size: 15px !important; }
+  .nfc-particles .particle { filter: blur(8px); opacity: 0.5; }
+}
+
+/* Ensure particles are always behind content and not interactable */
+.nfc-particles { z-index: 0 !important; pointer-events: none !important; }
+.nfc-hero .nfc-card, .nfc-page .nfc-card { position: relative; z-index: 3; }
+
+/* Center button text vertically */
+.full-cta, .ui-btn { display: inline-flex !important; align-items: center !important; justify-content: center !important; text-align: center !important; height: 44px; line-height: 20px; }
+
+/* star rating styles (append) */
+.star { color: rgba(255,255,255,0.3); transition: transform 160ms ease, color 200ms ease; text-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+.star.filled { color: #ffd66b; transform: translateY(-4px) scale(1.08); text-shadow: 0 6px 18px rgba(255,200,90,0.14); }
+
+/* HOTFIX: Ensure light-theme page is not blank/fully white and NFC content visible */
+:root:not([data-theme="dark"]) body, :root:not([data-theme="dark"]) html {
+  background: linear-gradient(180deg, #e6f8ff 0%, #f3fbff 48%, #ffffff 100%) !important;
+  color: #0b1220 !important;
+  min-height: 100vh !important;
+}
+
+:root:not([data-theme="dark"]) .nfc-hero {
+  background: linear-gradient(180deg, rgba(230,248,255,0.9), rgba(243,251,255,0.85)) !important;
+  z-index: 2 !important;
+}
+
+/* Unhide card and controls if some rule hid them */
+.nfc-hero, .nfc-card, .brand, .top-controls, .app-header, .app-container {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Ensure text is visible on light background */
+:root:not([data-theme="dark"]) .nfc-card,
+:root:not([data-theme="dark"]) .nfc-card * {
+  color: #0b1220 !important;
+}
+
+/* Platform chips for light theme: visible with primary tint */
+:root:not([data-theme="dark"]) .platform-chip {
+  background: rgba(9,109,217,0.06);
+  border: 1px solid rgba(9,109,217,0.12);
+  color: rgba(9,109,217,0.95);
+  box-shadow: none;
+}
+:root:not([data-theme="dark"]) .platform-chip.selected {
+  background: linear-gradient(90deg, rgba(86,166,255,0.12), rgba(185,147,255,0.08));
+  border-color: rgba(86,166,255,0.22);
+  color: #073763;
+  box-shadow: 0 8px 24px rgba(9,109,217,0.06);
+}
+
+/* Ensure NFC content sits above background layer */
+.nfc-hero > .ant-card, .nfc-hero .nfc-card {
+  position: relative;
+  z-index: 2;
+}
+/* animated gradient band behind header */
+.app-header::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 64px;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(86,166,255,0.10), rgba(185,147,255,0.06), rgba(110,231,183,0.04));
+  transform: translateY(-6px);
+  filter: blur(18px);
+  opacity: 0.95;
+  animation: headerGlow 12s linear infinite;
+}
+.app-header > * { position: relative; z-index: 2; }
+@keyframes headerGlow {
+  0% { background-position: 0% 50% }
+  50% { background-position: 100% 50% }
+  100% { background-position: 0% 50% }
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.brand-logo{
+  width:48px;
+  height:48px;
+  border-radius:10px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background: transparent;
+  box-shadow: 0 6px 18px rgba(9,109,217,0.08);
+  padding:4px;
+  animation: float 6s ease-in-out infinite;
+}
+@keyframes float{
+  0% { transform: translateY(0px) }
+  50% { transform: translateY(-6px) }
+  100% { transform: translateY(0px) }
+}
+.brand-title{ font-weight:700; font-size:18px }
+.header-actions{ display:flex; gap:12px; align-items:center }
+/* reserve space on the right of header so top-controls (absolute) don't overlap */
+.header-actions { padding-right: 220px; }
+
+/* ensure top-controls are horizontally arranged and spaced */
+.top-controls {
+  position: absolute;
+  right: 18px;
+  top: 12px;
+  z-index: 5;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: transparent;
+}
+.top-controls .ant-btn, .top-controls button {
+  margin: 0;
+  padding: 6px 8px;
+}
+
+/* token view small tweaks */
+.platform-grid{ display:flex; gap:12px; flex-wrap:wrap; margin-top:8px }
+.platform-chip{ padding:8px 12px; border-radius:999px; background:#fff; border:1px solid #eee; box-shadow:0 4px 14px rgba(2,6,23,0.02); cursor:pointer }
+.platform-chip.selected{ border-color: var(--primary); box-shadow: 0 6px 18px rgba(9,109,217,0.08); color:var(--primary) }
+
+/* top controls (theme / lang) */
+.top-controls {
+  position: absolute;
+  right: 18px;
+  top: 12px;
+  z-index: 4;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: transparent;
+}
+
+/* brand title uses brush font */
+.brand-title {
+  font-family: 'Ma Shan Zheng', 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 20px;
+  letter-spacing: 0.4px;
+  line-height: 1;
+}
+
+.brand-img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  border-radius:8px;
+}
+
+/* brand initials fallback */
+.brand-initials{
+  width:100%;
+  height:100%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  color:white;
+  background: linear-gradient(135deg, var(--primary), var(--primary-600));
+  border-radius:8px;
+  box-shadow: 0 8px 20px rgba(9,109,217,0.12);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* top-controls dark mode visibility */
+.top-controls button, .top-controls .ant-btn {
+  color: var(--text);
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+:root[data-theme="dark"] .top-controls button, :root[data-theme="dark"] .top-controls .ant-btn{
+  color: var(--text);
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+/* buttons in nfc card dark mode */
+:root[data-theme="dark"] .nfc-card .ant-btn {
+  background: rgba(255,255,255,0.03);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+/* ensure small muted text in dark is visible */
+:root[data-theme="dark"] .nfc-card, :root[data-theme="dark"] .nfc-card p, :root[data-theme="dark"] .nfc-card .muted {
+  color: var(--muted);
+}
+
+/* gradient clipped title for web3 look */
+.brand-title.gradient {
+  background: linear-gradient(90deg, #56a6ff, #b893ff 60%, #6ee7b7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 0.6px;
+  text-shadow: 0 2px 14px rgba(110,231,183,0.06);
+}
+
+/* ensure brand title has gradient by default for web3 look */
+.brand-title {
+  background-image: linear-gradient(90deg,#56a6ff,#b893ff 60%,#6ee7b7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* login page top controls placement */
+.login-hero .top-controls { right: 36px; top: 18px }
+
+
+/* animated background */
+body {
+  background: radial-gradient(1200px 600px at 10% 10%, rgba(9,109,217,0.06), transparent 10%),
+              radial-gradient(1000px 500px at 90% 90%, rgba(24,144,255,0.04), transparent 10%),
+              linear-gradient(180deg, #f4f9ff 0%, #ffffff 40%);
+  background-attachment: fixed;
+  transition: background 400ms ease;
+}
+
+/* moving gradient band */
+.bg-band {
+  position: fixed;
+  inset: -20% -40% auto -40%;
+  height: 60vh;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(90deg, rgba(24,144,255,0.08), rgba(9,109,217,0.06), rgba(24,144,255,0.04));
+  filter: blur(40px);
+  transform: translateX(-10%);
+  animation: bandMove 18s linear infinite;
+}
+
+@keyframes bandMove {
+  0% { transform: translateX(-20%) rotate(-6deg) }
+ 50% { transform: translateX(20%) rotate(-4deg) }
+ 100% { transform: translateX(-20%) rotate(-6deg) }
+}
+
+/* card entrance */
+.ant-card {
+  position: relative;
+  z-index: 2;
+  animation: cardEntrance 520ms cubic-bezier(.16,.84,.24,1) both;
+  will-change: transform, opacity;
+}
+@keyframes cardEntrance {
+  from { opacity: 0; transform: translateY(10px) scale(.995) }
+  to   { opacity: 1; transform: translateY(0px) scale(1) }
+}
+
+/* floating brand logo micro interaction */
+.brand-logo:hover {
+  transform: translateY(-6px) scale(1.02);
+  transition: transform 300ms ease;
+}
+
+/* Prism header text-only styles */
+.prism-header { display: block; position: relative; width: 100%; height: 28vh; pointer-events: none; }
+.prism-backdrop { pointer-events: none; }
+.prism-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 900;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-rendering: optimizeLegibility;
+  filter: drop-shadow(0 0 40px rgba(255,255,255,0.35)) drop-shadow(0 0 80px rgba(138,43,226,0.3));
+  animation: glowPulse 3s ease-in-out infinite alternate;
+}
+@keyframes glowPulse {
+  from {
+    filter: drop-shadow(0 0 40px rgba(255,255,255,0.35)) drop-shadow(0 0 80px rgba(138,43,226,0.3));
+  }
+  to {
+    filter: drop-shadow(0 0 60px rgba(255,255,255,0.55)) drop-shadow(0 0 120px rgba(0,191,255,0.35));
+  }
+}
+
+/* Neon button (user provided) */
+.neon-btn {
+  position: relative;
+  display: inline-block;
+  padding: 12px 24px;
+  margin: 0;
+  color: #ff69c7 !important;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: 0.5s;
+  letter-spacing: 4px;
+  overflow: hidden;
+  margin-right: 0;
+  border-radius: 8px;
+  pointer-events: auto;
+  background: transparent;
+  font-family: inherit;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.neon-btn.loading { opacity: 0.6; pointer-events: none; }
+.neon-btn span {
+  position: absolute;
+  display: block;
+}
+.neon-btn span:nth-child(1){
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg,transparent,#ff69c7);
+  animation: neon-anim1 1s linear infinite;
+}
+@keyframes neon-anim1{
+  0%{ left: -100%; }
+  50%,100%{ left: 100%; }
+}
+.neon-btn span:nth-child(2){
+  top: -100%;
+  right: 0;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(180deg,transparent,#ff69c7);
+  animation: neon-anim2 1s linear infinite;
+  animation-delay: 0.25s;
+}
+@keyframes neon-anim2{
+  0%{ top: -100%; }
+  50%,100%{ top: 100%; }
+}
+.neon-btn span:nth-child(3){
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(270deg,transparent,#ff69c7);
+  animation: neon-anim3 1s linear infinite;
+  animation-delay: 0.5s;
+}
+@keyframes neon-anim3{
+  0%{ right: -100%; }
+  50%,100%{ right: 100%; }
+}
+.neon-btn span:nth-child(4){
+  bottom: -100%;
+  left: 0;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(360deg,transparent,#ff69c7);
+  animation: neon-anim4 1s linear infinite;
+  animation-delay: 0.75s;
+}
+@keyframes neon-anim4{
+  0%{ bottom: -100%; }
+  50%,100%{ bottom: 100%; }
+}
+.neon-btn:hover{
+  background: #ff69c7 !important;
+  color: #050801 !important;
+  box-shadow: 0 0 5px #ff69c7, 0 0 25px #ff69c7, 0 0 50px #ff69c7, 0 0 200px #ff69c7;
+  -webkit-box-reflect: below 1px linear-gradient(transparent, #0005);
+}
+.neon-btn:nth-child(1){ filter: none; }
+.neon-btn:nth-child(2){ filter: none; }
+
+/* button and input polish */
+.ant-btn {
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-weight: 600;
+  transition: transform 160ms ease, box-shadow 200ms ease, background 160ms ease;
+  background: transparent;
+  border: 1px solid rgba(16,24,40,0.06);
+}
+.ant-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(21,32,43,0.08);
+}
+.ant-btn-primary, .ant-btn-primary:focus, .ant-btn-primary:hover {
+  background: linear-gradient(90deg, var(--primary), var(--primary-600));
+  border: none;
+  color: white;
+  box-shadow: 0 10px 30px rgba(9,109,217,0.12);
+}
+
+/* NFC hero backgrounds (day and night variants) */
+.nfc-hero {
+  padding: 18px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(250,251,253,0.6), rgba(245,247,250,0.4));
+  position: relative;
+  overflow: hidden;
+}
+
+:root[data-theme="dark"] .nfc-hero {
+  background: linear-gradient(180deg, rgba(6,14,23,0.55), rgba(8,14,22,0.6));
+}
+
+.nfc-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 10% 10%, rgba(255,255,255,0.02), transparent 8%),
+                    radial-gradient(circle at 90% 90%, rgba(255,255,255,0.015), transparent 8%);
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+.nfc-card {
+  background: linear-gradient(180deg, var(--card-bg), rgba(255,255,255,0.88));
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 8px 30px rgba(10,20,30,0.04);
+  border: 1px solid var(--card-border, rgba(0,0,0,0.06));
+}
+
+:root[data-theme="dark"] .nfc-card {
+  background: linear-gradient(180deg, rgba(8,14,22,0.6), rgba(7,12,20,0.6));
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+/* Force readable text inside NFC card in dark mode */
+:root[data-theme="dark"] .nfc-card,
+:root[data-theme="dark"] .nfc-card * {
+  color: rgba(230,238,249,0.95) !important;
+}
+
+:root[data-theme="dark"] .nfc-card textarea::placeholder {
+  color: rgba(255,255,255,0.32) !important;
+}
+
+:root[data-theme="dark"] .nfc-card .muted {
+  color: rgba(180,200,220,0.75) !important;
+}
+
+/* UI button helper */
+.ui-btn { 
+  border-radius: 10px; 
+  padding: 8px 12px; 
+  font-weight:600; 
+  border: none;
+}
+.ui-btn-primary { 
+  background: linear-gradient(90deg, var(--primary), var(--primary-600)); 
+  color: white;
+  box-shadow: 0 10px 30px rgba(9,109,217,0.12);
+}
+.ant-input:focus, .ant-input-focused, .ant-input:focus-visible, .ant-input-affix-wrapper-focused {
+  box-shadow: 0 6px 24px rgba(24,144,255,0.06);
+  border-color: var(--primary);
+}
+
+/* subtle page fade for route changes */
+.page-fade-enter {
+  opacity: 0;
+  transform: translateY(6px);
+}
+.page-fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 360ms cubic-bezier(.2,.9,.2,1);
+}
+.page-fade-exit {
+  opacity: 1;
+}
+.page-fade-exit-active {
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+/* token view micro animations */
+.platform-chip {
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+.platform-chip:hover { transform: translateY(-4px) scale(1.02) }
+
+/* card border and textarea colors for dark/light */
+textarea {
+  background: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--card-border, rgba(0,0,0,0.12));
+  padding: 8px;
+}
+
+/* KPI card module */
+.kpi-card {
+  border-radius: 12px;
+  background: var(--kpi-bg);
+  border: 1px solid var(--kpi-border);
+  padding: 18px;
+  transition: transform 300ms ease, box-shadow 300ms ease;
+  box-shadow: 0 8px 20px rgba(12,20,30,0.04);
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card:hover { transform: translateY(-6px) scale(1.01); box-shadow: 0 18px 40px rgba(12,20,30,0.08); }
+.kpi-card:before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, rgba(86,166,255,0.08), rgba(184,147,255,0.06));
+  filter: blur(14px);
+  opacity: 0.9;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+/* animated border glow for KPI */
+@keyframes borderPulse {
+  0% { box-shadow: 0 0 0 0 rgba(86,166,255,0.0) }
+  70% { box-shadow: 0 0 20px 6px rgba(86,166,255,0.06) }
+  100% { box-shadow: 0 0 0 0 rgba(86,166,255,0.0) }
+}
+.kpi-card.animated { animation: borderPulse 3.2s infinite ease-in-out; }
+
+/* table card (dark mode friendly) */
+.table-card .ant-table {
+  background: transparent;
+}
+:root[data-theme="dark"] .table-card .ant-table {
+  background: linear-gradient(180deg, rgba(8,14,22,0.28), rgba(8,14,22,0.12));
+  color: var(--text);
+}
+:root[data-theme="dark"] .table-card .ant-table-thead > tr > th {
+  background: rgba(255,255,255,0.02);
+  color: var(--text);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+:root[data-theme="dark"] .table-card .ant-table-tbody > tr > td {
+  background: rgba(0,0,0,0);
+  color: var(--text);
+  border-bottom: 1px solid rgba(255,255,255,0.02);
+}
+
+/* ensure pagination controls visible in dark */
+:root[data-theme="dark"] .ant-pagination {
+  color: var(--text);
+}
+
+/* stronger table borders and typography for dark mode */
+:root[data-theme="dark"] .table-card .ant-table {
+  border: 1px solid rgba(255,255,255,0.03);
+  border-radius: 10px;
+  overflow: hidden;
+}
+:root[data-theme="dark"] .table-card .ant-table-thead > tr > th {
+  border-right: 1px solid rgba(255,255,255,0.02);
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+:root[data-theme="dark"] .table-card .ant-table-tbody > tr > td {
+  font-weight: 500;
+  color: rgba(230,238,249,0.92);
+}
+
+/* make KPI values more visible in dark */
+:root[data-theme="dark"] .kpi-card .ant-statistic-content {
+  color: rgba(230,238,249,0.96);
+}
+
+/* Ensure KPI titles and descriptions are visible in both themes */
+.kpi-card .ant-statistic-title {
+  color: rgba(255,255,255,0.82);
+  font-weight: 600;
+  opacity: 0.95;
+}
+.kpi-card .ant-statistic-content-value {
+  color: rgba(255,255,255,0.98);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+:root .kpi-card .ant-statistic-title {
+  color: rgba(10,20,30,0.72);
+}
+:root .kpi-card .ant-statistic-content-value {
+  color: rgba(10,20,30,0.96);
+}
+
+/* subtle animated border on table hover rows */
+:root[data-theme="dark"] .table-card .ant-table-tbody > tr:hover {
+  background: rgba(255,255,255,0.015);
+  transform: translateY(-2px);
+  transition: all 180ms ease;
+  box-shadow: 0 8px 24px rgba(2,6,23,0.2);
+}
+
+/* adjust platform chip bg for dark mode */
+:root[data-theme="dark"] .platform-chip {
+  background: #08101a;
+  border-color: rgba(255,255,255,0.04);
+  color: var(--text);
+}
+
+/* ensure card border in dark mode is subtle */
+:root[data-theme="dark"] .ant-card {
+  border-color: rgba(255,255,255,0.06);
+}
+
+/* Ensure header action text (email/logout) visible in dark mode */
+:root[data-theme="dark"] .header-actions,
+:root[data-theme="dark"] .header-actions * {
+  color: rgba(230,238,249,0.95) !important;
+}
+:root[data-theme="dark"] .header-actions .ant-btn,
+:root[data-theme="dark"] .header-actions button,
+:root[data-theme="dark"] .header-actions a {
+  color: rgba(230,238,249,0.95) !important;
+  background: rgba(255,255,255,0.02);
+  border-color: rgba(255,255,255,0.03);
+}
+
+/* Merchant list title and card header visibility */
+:root[data-theme="dark"] .table-card h3,
+:root[data-theme="dark"] .table-card .ant-card-head-title,
+:root[data-theme="dark"] .table-card .ant-card-head {
+  color: rgba(230,238,249,0.96) !important;
+}
+
+/* Make logout button more visible if it's plain text */
+:root[data-theme="dark"] .header-actions button[danger] {
+  background: rgba(255,255,255,0.02) !important;
+  color: #ffd6d6 !important;
+  border: 1px solid rgba(255,255,255,0.04) !important;
+}
+
+
+/* responsive helpers */
+@media (max-width: 768px){
+  .app-container{ padding:12px; }
+  .ant-card{ padding:12px; }
+}
+@media (max-width: 420px){
+  .ant-table td, .ant-table th { font-size: 13px; padding:8px; }
+}
+
+/* small utility classes */
+.muted { color: var(--muted); }
+.btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+
+
+
+/* Strong visibility overrides for dark theme to fix remaining low-contrast items */
+:root[data-theme="dark"] .kpi-card,
+:root[data-theme="dark"] .kpi-card * {
+  color: #eaf6ff !important;
+}
+:root[data-theme="dark"] .kpi-card .ant-statistic-title {
+  color: #dbeffd !important;
+  opacity: 1 !important;
+}
+:root[data-theme="dark"] .kpi-card .ant-statistic-content-value {
+  color: #ffffff !important;
+  text-shadow: 0 3px 10px rgba(0,0,0,0.6) !important;
+}
+
+:root[data-theme="dark"] .table-card .ant-table-thead > tr > th,
+:root[data-theme="dark"] .table-card .ant-table-tbody > tr > td {
+  color: #dbeffd !important;
+}
+:root[data-theme="dark"] .table-card .ant-table-thead > tr > th {
+  background: rgba(255,255,255,0.02) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+}
+:root[data-theme="dark"] .table-card .ant-table-tbody > tr > td a,
+:root[data-theme="dark"] .table-card .ant-table-tbody > tr > td button {
+  color: #7ec3ff !important;
+}
+
+:root[data-theme="dark"] .ant-table .ant-table-tbody > tr > td {
+  background: transparent !important;
+}
+
+/* Table animated background: slow moving diagonal gradient */
+.table-card .ant-table {
+  background-image: linear-gradient(120deg, rgba(86,166,255,0.02) 0%, rgba(185,147,255,0.02) 25%, rgba(110,231,183,0.02) 50%, rgba(185,147,255,0.02) 75%, rgba(86,166,255,0.02) 100%);
+  background-size: 400% 400%;
+  animation: tableFlow 14s linear infinite;
+}
+
+@keyframes tableFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Publish shimmer CTA button (scoped) */
+.publish-shimmer-btn {
+    --glow-hue: 222deg;
+    --shadow-hue: 180deg;
+    --spring-easing: linear(0, 0.002, 0.01 0.9%, 0.038 1.8%, 0.156, 0.312 5.8%, 0.789 11.1%, 1.015 14.2%, 1.096, 1.157, 1.199, 1.224 20.3%, 1.231, 1.231, 1.226, 1.214 24.6%, 1.176 26.9%, 1.057 32.6%, 1.007 35.5%, 0.984, 0.968, 0.956, 0.949 42%, 0.946 44.1%, 0.95 46.5%, 0.998 57.2%, 1.007, 1.011 63.3%, 1.012 68.3%, 0.998 84%, 1);
+    --spring-duration: 1.33s;
+    --shimmer: 33deg;
+    --inset: 28px;
+
+    position: relative;
+    display: inline-block;
+    padding: 12px 34px;
+    min-width: 180px;
+    background-image: linear-gradient(315deg,#f4f7fb 0%, #e6eef9 50%);
+    color: #050801;
+    font-weight: 700;
+    isolation: isolate;
+    box-shadow: 0 2px 3px 1px hsl(var(--glow-hue) 20% 10% / 30%), inset 0 -10px 20px -10px hsla(var(--shadow-hue),10%,90%,0.95);
+    border-radius: 10px;
+    transform: scale(1);
+    transition: all var(--spring-duration) var(--spring-easing);
+    pointer-events: auto;
+    cursor: pointer;
+}
+.publish-shimmer-btn:hover:not(:active),
+.publish-shimmer-btn.active {
+    transition-duration: calc(var(--spring-duration) * 0.5);
+    transform: scale(1.2);
+    box-shadow: 0 4px 8px -2px hsl(var(--glow-hue) 50% 20% / 50%), inset 0 0 0 transparent;
+}
+.publish-shimmer-btn:active {
+    transform: scale(1.1);
+    transition-duration: calc(var(--spring-duration) * 0.5);
+}
+.publish-shimmer-btn .shimmer {
+    position: absolute;
+    inset: calc(var(--inset, 40px) * -1);
+    border-radius: inherit;
+    pointer-events: none;
+    mask-image: conic-gradient(from var(--shimmer), transparent 0%, transparent 20%, black 36%, black 45%, transparent 50%, transparent 70%, black 85%, black 95%, transparent 100%);
+    mix-blend-mode: plus-lighter;
+    animation: shimmer 1s linear infinite both;
+}
+.publish-shimmer-btn .shimmer::before,
+.publish-shimmer-btn .shimmer::after {
+    transition: all 0.5s ease;
+    opacity: 0;
+    content: "";
+    border-radius: inherit;
+    position: absolute;
+    mix-blend-mode: color;
+    inset: var(--inset, 40px);
+    pointer-events: none;
+}
+.publish-shimmer-btn .shimmer::before {
+    box-shadow: 0 0 calc(var(--inset, 40px) * 0.1)  2px hsl(var(--glow-hue) 20% 95%), 0 0 calc(var(--inset, 40px) * 0.18)  4px hsl(var(--glow-hue) 20% 80%), 0 0 calc(var(--inset, 40px) * 0.33)  4px hsl(var(--glow-hue) 50% 70%), 0 0 calc(var(--inset, 40px) * 0.66) 5px hsl(var(--glow-hue) 100% 70%);
+    z-index: -1;
+}
+.publish-shimmer-btn .shimmer::after {
+    box-shadow: inset 0 0 0 1px hsl(var(--glow-hue) 70% 95%), inset 0 0 2px 1px hsl(var(--glow-hue) 100% 80%), inset 0 0 5px 2px hsl(var(--glow-hue) 100% 70%);
+    z-index: 2;
+}
+.publish-shimmer-btn .text {
+    display: inline-block;
+    z-index: 3;
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-image: linear-gradient(120deg, transparent, hsla(var(--glow-hue),100%,80%,0.66) 40%, hsla(var(--glow-hue),100%,90%,0.9) 50%, transparent 52%);
+    background-repeat: no-repeat;
+    background-size: 300% 300%;
+    background-position: center 200%;
+    font-size: 14px;
+    line-height: 1;
+}
+
+/* Pink neon anchor button for publish page */
+.publish-neon {
+    position: relative;
+    display: inline-block;
+    padding: 25px 30px;
+    margin: 0;
+    color: #ff69c7 !important;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: 0.5s;
+    letter-spacing: 4px;
+    overflow: hidden;
+    margin-right: 0;
+    border-radius: 10px;
+    pointer-events: auto;
+    background: transparent;
+    font-family: inherit;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 220px;
+}
+.publish-neon span {
+    position: absolute;
+    display: block;
+    background: linear-gradient(90deg, transparent, #ff69c7);
+}
+.publish-neon span:nth-child(1){
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg,transparent,#ff69c7);
+    animation: animate1 1s linear infinite;
+}
+@keyframes animate1{
+    0%{ left:-100% } 50%,100%{ left:100% }
+}
+.publish-neon span:nth-child(2){
+    top: -100%;
+    right: 0;
+    width: 2px; height: 100%;
+    background: linear-gradient(180deg,transparent,#ff69c7);
+    animation: animate2 1s linear infinite;
+    animation-delay: 0.25s;
+}
+@keyframes animate2{ 0%{ top:-100% } 50%,100%{ top:100% } }
+.publish-neon span:nth-child(3){
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(270deg,transparent,#ff69c7);
+    animation: animate3 1s linear infinite;
+    animation-delay: 0.5s;
+}
+@keyframes animate3{ 0%{ right:-100% } 50%,100%{ right:100% } }
+.publish-neon span:nth-child(4){
+    bottom: -100%;
+    left: 0;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(360deg,transparent,#ff69c7);
+    animation: animate4 1s linear infinite;
+    animation-delay: 0.75s;
+}
+@keyframes animate4{ 0%{ bottom:-100% } 50%,100%{ bottom:100% } }
+.publish-neon:hover{
+    background: #ff69c7;
+    color: #050801;
+    box-shadow: 0 0 5px #ff69c7,0 0 25px #ff69c7,0 0 50px #ff69c7,0 0 200px #ff69c7;
+    -webkit-box-reflect: below 1px linear-gradient(transparent, #0005);
+}
+
+.publish-neon { text-align: center; }
+.publish-neon::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; }
+.publish-neon { z-index: 1; }
+.publish-neon > * { z-index: 2; position: relative; }
+.publish-shimmer-btn:hover .text,
+.publish-shimmer-btn.active .text {
+    animation: text .66s ease-in 1 both;
+}
+
+/* Row entrance animation and subtle stagger */
+.table-card .ant-table-tbody tr {
+  opacity: 0;
+  transform: translateY(6px);
+  animation: rowFadeIn 420ms ease forwards;
+}
+.table-card .ant-table-tbody tr:nth-child(1){ animation-delay: 0.04s; }
+.table-card .ant-table-tbody tr:nth-child(2){ animation-delay: 0.08s; }
+.table-card .ant-table-tbody tr:nth-child(3){ animation-delay: 0.12s; }
+.table-card .ant-table-tbody tr:nth-child(4){ animation-delay: 0.16s; }
+.table-card .ant-table-tbody tr:nth-child(5){ animation-delay: 0.20s; }
+
+@keyframes rowFadeIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* KPI subtle parallax with layered glow */
+.app-header::before { will-change: transform; }
+.app-header:hover::before { transform: translateY(-2px) scale(1.01); transition: transform 600ms ease; }
+.kpi-card.animated::after {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(circle at 20% 30%, rgba(86,166,255,0.06), transparent 6%), radial-gradient(circle at 80% 70%, rgba(185,147,255,0.05), transparent 6%);
+  filter: blur(40px);
+  pointer-events: none;
+  animation: kpiDrift 8s linear infinite;
+  opacity: 0.9;
+}
+@keyframes kpiDrift {
+  0% { transform: translateX(-6%); }
+  50% { transform: translateX(6%); }
+  100% { transform: translateX(-6%); }
+}
+
+/* Final high-priority overrides for any remaining low-contrast text */
+:root[data-theme="dark"] .ant-table,
+:root[data-theme="dark"] .ant-table * {
+  color: #eaf6ff !important;
+  opacity: 1 !important;
+}
+:root[data-theme="dark"] .ant-table-thead th,
+:root[data-theme="dark"] .ant-table-tbody td,
+:root[data-theme="dark"] .ant-table-thead th span,
+:root[data-theme="dark"] .ant-table-tbody td span {
+  color: #eaf6ff !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+:root[data-theme="dark"] .table-card h3,
+:root[data-theme="dark"] .ant-card-head .ant-card-head-title {
+  color: #f1f9ff !important;
+  font-weight: 700 !important;
+}
+:root[data-theme="dark"] .header-actions,
+:root[data-theme="dark"] .header-actions * {
+  color: #eaf6ff !important;
+  opacity: 1 !important;
+}
+:root[data-theme="dark"] .header-actions a,
+:root[data-theme="dark"] .header-actions button,
+:root[data-theme="dark"] .header-actions .ant-btn {
+  color: #eaf6ff !important;
+  font-weight: 600 !important;
+  background: rgba(255,255,255,0.015) !important;
+  border-color: rgba(255,255,255,0.03) !important;
+}
+
+/* Merchant page specific overrides (ensure readability and layout) */
+.merchant-page .ant-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)) !important;
+  border: 1px solid rgba(255,255,255,0.04) !important;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.5);
+}
+.merchant-page .ant-card .ant-card-head .ant-card-head-title {
+  color: var(--text) !important;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.merchant-page .ant-statistic-title {
+  color: var(--muted) !important;
+}
+.merchant-page .ant-statistic-content-value {
+  color: var(--text) !important;
+  font-weight: 700;
+}
+.merchant-page .ant-table thead th {
+  border-bottom: 1px solid rgba(0,0,0,0.04) !important;
+  background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)) !important;
+}
+.merchant-page .ant-table tbody td {
+  color: var(--text) !important;
+  background: transparent !important;
+  padding: 14px 16px !important;
+}
+.merchant-page .ant-table-tbody > tr:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.35);
+  transition: all 260ms ease;
+}
+
+/* Export button visibility/shape */
+.merchant-page .ant-card > div > div > div[style*="position: absolute"] .ant-btn {
+  padding: 8px 12px !important;
+  border-radius: 12px !important;
+  z-index: 6 !important;
+}
+
+/* Light mode stacking fix: ensure TopControls and header don't overlap content */
+.merchant-page .top-controls {
+  position: relative;
+  z-index: 5;
+}
+.merchant-page > .ant-card {
+  margin-top: 8px;
+}
+
+/* ensure merchant page root reserves space for top-controls so it doesn't overlap first card */
+.merchant-page {
+  position: relative;
+  padding-top: 64px; /* reserve space for top-controls */
+}
+
+/* place top-controls at merchant page top-right (inside merchant page) */
+.merchant-page .top-controls {
+  position: absolute !important;
+  top: 12px !important;
+  right: 18px !important;
+  z-index: 60 !important;
+  background: transparent !important;
+  gap: 10px !important;
+}
+
+/* make sure top-controls buttons are compact and not overflowing */
+.merchant-page .top-controls .ant-btn {
+  padding: 6px 8px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Export button: prevent label clipping/stacking and make single visible element */
+.merchant-page .ant-card > div > div > div[style*="position: absolute"] {
+  overflow: visible !important;
+  display: inline-block !important;
+}
+.merchant-page .ant-card > div > div > div[style*="position: absolute"] .ant-btn {
+  white-space: nowrap !important;
+  overflow: visible !important;
+  line-height: 1 !important;
+  transform: none !important;
+}
+
+/* Strong dark-mode merchant table fixes: remove white sheet, force readable text */
+:root[data-theme="dark"] .merchant-page .ant-table-wrapper,
+:root[data-theme="dark"] .merchant-page .ant-table,
+:root[data-theme="dark"] .merchant-page .ant-table-container,
+:root[data-theme="dark"] .merchant-page .ant-table .ant-table-content {
+  background: transparent !important;
+  color: #eaf6ff !important;
+}
+
+:root[data-theme="dark"] .merchant-page .ant-table thead th {
+  color: #dbeffd !important;
+  background: rgba(255,255,255,0.02) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.04) !important;
+}
+
+:root[data-theme="dark"] .merchant-page .ant-table tbody td {
+  background: transparent !important;
+  color: #dceeff !important;
+  opacity: 1 !important;
+  border-bottom: 1px solid rgba(255,255,255,0.02) !important;
+}
+
+/* If Ant inserts a white table body wrapper, override it explicitly */
+:root[data-theme="dark"] .merchant-page .ant-table-container .ant-table-content > table,
+:root[data-theme="dark"] .merchant-page .ant-table-container .ant-table-content > table > tbody,
+:root[data-theme="dark"] .merchant-page .ant-table-container .ant-table-content > table > thead {
+  background: transparent !important;
+}
+
+/* Ensure pagination controls are visible in dark mode */
+:root[data-theme="dark"] .merchant-page .ant-pagination {
+  color: #eaf6ff !important;
+}
+
+/* Force export button readable label and prevent clipping */
+.merchant-page .ant-card > div > div > div[style*="position: absolute"] .ant-btn,
+.merchant-page .ant-card > div > div > div[style*="position: absolute"] {
+  background: rgba(255,255,255,0.03) !important;
+  color: #061225 !important;
+  border-radius: 12px !important;
+  padding: 6px 10px !important;
+  box-shadow: 0 4px 10px rgba(2,6,23,0.3) !important;
+}
+
+/* Hide duplicate absolute export wrapper (use inline export button below sparkline instead) */
+.merchant-page .ant-card > div > div > div[style*="position: absolute"] {
+  display: none !important;
+}
+
+/* Ensure the inline export button in merchant page body is readable in dark mode */
+:root[data-theme="dark"] .merchant-page .ant-card .ant-card-body .ant-btn {
+  /* make export CTA fully opaque white with primary accent for max contrast */
+  background: #ffffff !important;
+  color: #061225 !important;
+  border: 1px solid rgba(9,109,217,0.14) !important;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.45) !important;
+  backdrop-filter: none !important;
+  mix-blend-mode: normal !important;
+  opacity: 1 !important;
+  z-index: 80 !important;
+  padding: 8px 14px !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+}
+
+/* Slightly enlarge text and ensure single-line label */
+:root[data-theme="dark"] .merchant-page .ant-card .ant-card-body .ant-btn span {
+  color: #061225 !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+}
+
+/* Hover state: subtle primary glow */
+:root[data-theme="dark"] .merchant-page .ant-card .ant-card-body .ant-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 14px 36px rgba(9,109,217,0.18) !important;
+}

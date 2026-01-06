@@ -1,0 +1,8 @@
+{
+  "typeCheckingMode": "off",
+  "reportMissingTypeStubs": false,
+  "reportMissingImports": false,
+  "include": ["backend"]
+}
+
+

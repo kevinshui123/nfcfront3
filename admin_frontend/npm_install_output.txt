@@ -1,0 +1,3 @@
+Running npm install in C:\Users\Administrator\Desktop\nfc\admin_frontend
+
+up to date in 313ms

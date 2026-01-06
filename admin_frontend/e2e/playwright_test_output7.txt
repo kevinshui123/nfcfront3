@@ -1,0 +1,55 @@
+Running Playwright tests in C:\Users\Administrator\Desktop\nfc\admin_frontend\e2e
+
+Running 2 tests using 2 workers
+
+(node:18892) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:6336) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:6336) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:18892) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  2 tests\login.spec.ts:3:5 › login and navigate to tags (10.3s)
+  x  1 tests\dashboard.spec.ts:3:5 › login -> dashboard -> open merchant panel (10.3s)
+
+
+  1) tests\dashboard.spec.ts:3:5 › login -> dashboard -> open merchant panel ───────────────────────
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('button:has-text("登录")') to be visible[22m
+
+
+       6 |   await page.fill('input[placeholder="邮箱"]', 'admin@example.com');
+       7 |   await page.fill('input[placeholder="密码"]', 'password123');
+    >  8 |   await page.waitForSelector('button:has-text("登录")', { timeout: 10000 });
+         |              ^
+       9 |   await page.click('button:has-text("登录")');
+      10 |   await expect(page).toHaveURL(/\/dashboard/);
+      11 |   await expect(page.locator('text=控制面板')).toBeVisible();
+        at C:\Users\Administrator\Desktop\nfc\admin_frontend\e2e\tests\dashboard.spec.ts:8:14
+
+    Error Context: test-results\dashboard-login---dashboard---open-merchant-panel\error-context.md
+
+  2) tests\login.spec.ts:3:5 › login and navigate to tags ──────────────────────────────────────────
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('button:has-text("登录")') to be visible[22m
+
+
+       6 |   await page.fill('input[placeholder=\"邮箱\"]', 'admin@example.com');
+       7 |   await page.fill('input[placeholder=\"密码\"]', 'password123');
+    >  8 |   await page.waitForSelector('button:has-text(\"登录\")', { timeout: 10000 });
+         |              ^
+       9 |   await page.click('button:has-text(\"登录\")');
+      10 |   // after login mock will update URL to /dashboard
+      11 |   await expect(page).toHaveURL(/\/dashboard/);
+        at C:\Users\Administrator\Desktop\nfc\admin_frontend\e2e\tests\login.spec.ts:8:14
+
+    Error Context: test-results\login-login-and-navigate-to-tags\error-context.md
+
+  2 failed
+    tests\dashboard.spec.ts:3:5 › login -> dashboard -> open merchant panel ────────────────────────
+    tests\login.spec.ts:3:5 › login and navigate to tags ───────────────────────────────────────────

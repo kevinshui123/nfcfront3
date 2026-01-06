@@ -1,0 +1,29 @@
+{
+  "name": "AllValue Link Devcontainer",
+  "dockerComposeFile": [
+    "../docker-compose.yml"
+  ],
+  "service": "backend",
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+  "shutdownAction": "stopCompose",
+  "extensions": [
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-azuretools.vscode-docker"
+  ],
+  "settings": {
+    "python.defaultInterpreterPath": "/workspace/backend/.venv/bin/python",
+    "python.analysis.extraPaths": [
+      "/workspace/backend"
+    ]
+  },
+  "forwardPorts": [
+    8000,
+    5432
+  ],
+  "postCreateCommand": "python3 -m venv /workspace/backend/.venv && /workspace/backend/.venv/bin/python -m pip install --upgrade pip && /workspace/backend/.venv/bin/pip install -r /workspace/backend/requirements.txt",
+  "remoteUser": "root"
+}
+
+

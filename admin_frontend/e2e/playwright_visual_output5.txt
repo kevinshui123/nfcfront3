@@ -1,0 +1,75 @@
+Running Playwright tests in C:\Users\Administrator\Desktop\nfc\admin_frontend\e2e
+
+Running 3 tests using 3 workers
+
+(node:4004) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:21516) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:15516) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:4004) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:21516) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:15516) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\visual.spec.ts:5:5 › visual smoke snapshots (5.0s)
+  x  3 tests\dashboard.spec.ts:3:5 › login -> dashboard -> open merchant panel (5.3s)
+  x  2 tests\login.spec.ts:3:5 › login and navigate to tags (5.3s)
+
+
+  1) tests\dashboard.spec.ts:3:5 › login -> dashboard -> open merchant panel ───────────────────────
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('text=/商家列表|Merchants/')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('text=/商家列表|Merchants/')[22m
+
+
+       7 |   await page.goto(base + '/dashboard');
+       8 |   await expect(page).toHaveURL(/\/dashboard/);
+    >  9 |   await expect(page.locator('text=/商家列表|Merchants/')).toBeVisible();
+         |                                                       ^
+      10 |   // click first 查看 / View button (navigates to merchant page)
+      11 |   const btn = page.getByRole('button', { name: /查看|View/ }).first();
+      12 |   await btn.click();
+        at C:\Users\Administrator\Desktop\nfc\admin_frontend\e2e\tests\dashboard.spec.ts:9:55
+
+    Error Context: test-results\dashboard-login---dashboard---open-merchant-panel\error-context.md
+
+  2) tests\login.spec.ts:3:5 › login and navigate to tags ──────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('text=/商家列表|Merchants/')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('text=/商家列表|Merchants/')[22m
+
+
+       7 |   await page.goto(base + '/dashboard');
+       8 |   await expect(page).toHaveURL(/\/dashboard/);
+    >  9 |   await expect(page.locator('text=/商家列表|Merchants/')).toBeVisible();
+         |                                                       ^
+      10 | });
+      11 |
+      12 |
+        at C:\Users\Administrator\Desktop\nfc\admin_frontend\e2e\tests\login.spec.ts:9:55
+
+    Error Context: test-results\login-login-and-navigate-to-tags\error-context.md
+
+  2 failed
+    tests\dashboard.spec.ts:3:5 › login -> dashboard -> open merchant panel ────────────────────────
+    tests\login.spec.ts:3:5 › login and navigate to tags ───────────────────────────────────────────
+  1 passed (6.0s)

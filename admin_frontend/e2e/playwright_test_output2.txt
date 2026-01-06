@@ -1,0 +1,59 @@
+Running Playwright tests in C:\Users\Administrator\Desktop\nfc\admin_frontend\e2e
+
+Running 2 tests using 2 workers
+
+(node:15112) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11360) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:15112) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11360) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 tests\dashboard.spec.ts:3:5 › login -> dashboard -> open merchant panel (30.0s)
+  x  2 tests\login.spec.ts:3:5 › login and navigate to tags (30.0s)
+
+
+  1) tests\dashboard.spec.ts:3:5 › login -> dashboard -> open merchant panel ───────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.fill: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('input[placeholder="邮箱"]')[22m
+
+
+      4 |   const base = process.env.E2E_FRONTEND_URL || 'http://localhost:5173';
+      5 |   await page.goto(base + '/login');
+    > 6 |   await page.fill('input[placeholder="邮箱"]', 'admin@example.com');
+        |              ^
+      7 |   await page.fill('input[placeholder="密码"]', 'password123');
+      8 |   await page.click('button:has-text("登录")');
+      9 |   await expect(page).toHaveURL(/\/dashboard/);
+        at C:\Users\Administrator\Desktop\nfc\admin_frontend\e2e\tests\dashboard.spec.ts:6:14
+
+    Error Context: test-results\dashboard-login---dashboard---open-merchant-panel\error-context.md
+
+  2) tests\login.spec.ts:3:5 › login and navigate to tags ──────────────────────────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.fill: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('input[name="email"]')[22m
+
+
+      4 |   const base = process.env.E2E_FRONTEND_URL || 'http://localhost:5173';
+      5 |   await page.goto(base + '/login');
+    > 6 |   await page.fill('input[name="email"]', 'admin@example.com');
+        |              ^
+      7 |   await page.fill('input[name="password"]', 'password123');
+      8 |   await page.click('button[type="submit"]');
+      9 |   // after login should redirect to /tags
+        at C:\Users\Administrator\Desktop\nfc\admin_frontend\e2e\tests\login.spec.ts:6:14
+
+    Error Context: test-results\login-login-and-navigate-to-tags\error-context.md
+
+  2 failed
+    tests\dashboard.spec.ts:3:5 › login -> dashboard -> open merchant panel ────────────────────────
+    tests\login.spec.ts:3:5 › login and navigate to tags ───────────────────────────────────────────
