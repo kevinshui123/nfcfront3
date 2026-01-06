@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { Card, Table, Button, Spin, Row, Col, Statistic, Space } from 'antd'
-import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons'
-import { getMerchants } from '../api'
+import { Card, Table, Button, Spin, Row, Col, Statistic, Space, Modal, message, Alert } from 'antd'
+import { ArrowUpOutlined, ArrowDownOutlined, UserAddOutlined } from '@ant-design/icons'
+import { getMerchants, createMerchant } from '../api'
 import { useNavigate } from 'react-router-dom'
 import TopControls from '../components/TopControls'
 import { t } from '../i18n'
@@ -16,6 +16,8 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const [merchants, setMerchants] = useState([])
   const [loading, setLoading] = useState(true)
+  const [creatingMerchant, setCreatingMerchant] = useState(false)
+  const [newMerchantCredentials, setNewMerchantCredentials] = useState(null)
 
   useEffect(() => {
     let mounted = true
@@ -25,6 +27,23 @@ export default function Dashboard() {
       .finally(()=> { if (mounted) setLoading(false) })
     return ()=> mounted = false
   }, [])
+
+  const handleCreateMerchant = async () => {
+    setCreatingMerchant(true)
+    try {
+      const credentials = await createMerchant()
+      setNewMerchantCredentials(credentials)
+      message.success('商户账号创建成功')
+      // Refresh merchants list
+      const updatedMerchants = await getMerchants()
+      setMerchants(updatedMerchants)
+    } catch (error) {
+      console.error('创建商户失败:', error)
+      message.error('创建商户失败')
+    } finally {
+      setCreatingMerchant(false)
+    }
+  }
 
   // derive top KPIs from merchants list
   const totalVisits = merchants.reduce((s, m) => s + (m.visits || 0), 0)
@@ -46,6 +65,36 @@ export default function Dashboard() {
 
   return (
     <div style={{ padding: 24 }}>
+      {/* Modal for displaying new merchant credentials */}
+      <Modal
+        title="新商户账号创建成功"
+        open={!!newMerchantCredentials}
+        onCancel={() => setNewMerchantCredentials(null)}
+        footer={[
+          <Button key="close" onClick={() => setNewMerchantCredentials(null)}>
+            关闭
+          </Button>
+        ]}
+        width={600}
+      >
+        {newMerchantCredentials && (
+          <div>
+            <Alert
+              message="重要提醒"
+              description="请安全保存这些凭证信息。一旦关闭此窗口，将无法再次查看密码。"
+              type="warning"
+              showIcon
+              style={{ marginBottom: 16 }}
+            />
+            <div style={{ background: '#f5f5f5', padding: 16, borderRadius: 8 }}>
+              <p><strong>用户名:</strong> {newMerchantCredentials.username}</p>
+              <p><strong>密码:</strong> {newMerchantCredentials.password}</p>
+              <p><strong>店铺ID:</strong> {newMerchantCredentials.shop_id}</p>
+            </div>
+          </div>
+        )}
+      </Modal>
+
       <div className="app-header">
         <div className="brand">
           <div className="brand-logo"><div className="brand-initials">SZ</div></div>
@@ -57,7 +106,17 @@ export default function Dashboard() {
         <div style={{ position: 'relative' }}>
           <div className="header-actions">
             <div className="muted">admin@example.com</div>
-            <Button onClick={() => { localStorage.removeItem('access_token'); window.location.href = '/' }}>登出</Button>
+            <Space>
+              <Button
+                type="primary"
+                icon={<UserAddOutlined />}
+                loading={creatingMerchant}
+                onClick={handleCreateMerchant}
+              >
+                创建商户账号
+              </Button>
+              <Button onClick={() => { localStorage.removeItem('access_token'); window.location.href = '/' }}>登出</Button>
+            </Space>
           </div>
           <div style={{ position: 'absolute', right: 0, top: -6 }}>
             <TopControls />

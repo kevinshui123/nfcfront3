@@ -9,6 +9,7 @@ import LoginPage from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import TagsPage from './pages/Tags'
 import MerchantPage from './pages/Merchant'
+import MerchantDashboard from './pages/MerchantDashboard'
 import TokenView from './pages/TokenView'
 import PublishPage from './pages/Publish'
 import NeuralBackground from './components/NeuralBackground'
@@ -39,7 +40,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={token ? <Dashboard /> : <Navigate to="/login" replace />} />
-        <Route path="/merchant/:id" element={token ? <MerchantPage /> : <Navigate to="/login" replace />} />
+        <Route path="/merchant/:id" element={token ? <MerchantDashboard /> : <Navigate to="/login" replace />} />
         <Route path="/t/:token" element={<TokenView />} />
         <Route path="/t/:token/publish/:platform" element={<PublishPage />} />
         <Route path="/tags" element={token ? <TagsPage /> : <Navigate to="/login" replace />} />

@@ -128,4 +128,31 @@ export async function socialPublish(platform, payload) {
   return resp.data
 }
 
+export async function createMerchant() {
+  if (USE_MOCK) {
+    return {
+      username: 'merchant_' + Math.random().toString(36).slice(2, 8),
+      password: Math.random().toString(36).slice(2, 12),
+      shop_id: 'shop_' + Math.random().toString(36).slice(2, 8)
+    }
+  }
+  const resp = await apiClient.post('/admin/merchants')
+  return resp.data
+}
+
+export async function getMerchantData(shopId) {
+  if (USE_MOCK) {
+    return {
+      shop: { id: shopId, name: 'Mock Shop ' + shopId },
+      visits: Math.floor(Math.random() * 100),
+      reviews: Math.floor(Math.random() * 20),
+      contents: [
+        { id: '1', title: 'Sample Review', token: 'demo-token', platform: 'xiaohongshu', created_at: new Date().toISOString() }
+      ]
+    }
+  }
+  const resp = await apiClient.get(`/merchant/${shopId}`)
+  return resp.data
+}
+
 
