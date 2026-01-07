@@ -24,8 +24,8 @@ try {
 } catch (e) {}
 
 function App() {
-  const token = localStorage.getItem('access_token')
- 
+  const isAuth = () => !!localStorage.getItem('access_token')
+
   return (
     <ConfigProvider
       theme={{
@@ -39,8 +39,8 @@ function App() {
       <BodyClassToggler />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/dashboard" element={token ? <Dashboard /> : <Navigate to="/login" replace />} />
-        <Route path="/merchant/:id" element={token ? <MerchantDashboard /> : <Navigate to="/login" replace />} />
+        <Route path="/dashboard" element={isAuth() ? <Dashboard /> : <Navigate to="/login" replace />} />
+        <Route path="/merchant/:id" element={isAuth() ? <MerchantDashboard /> : <Navigate to="/login" replace />} />
         <Route path="/t/:token" element={<TokenView />} />
         <Route path="/t/:token/publish/:platform" element={<PublishPage />} />
         <Route path="/tags" element={token ? <TagsPage /> : <Navigate to="/login" replace />} />
