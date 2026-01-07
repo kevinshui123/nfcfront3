@@ -137,6 +137,38 @@ async def get_me(user=Depends(get_current_user)):
     return {"email": getattr(user, "email", None), "is_admin": getattr(user, "is_admin", 0), "shop_id": getattr(user, "shop_id", None)}
 
 
+@router.post("/admin/migrate_tag_uris")
+async def migrate_tag_uris(db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
+    """
+    Admin-only: migrate stored ndef_payload.uri for all nfc_tags to point to the frontend SPA domain.
+    This updates each tag's ndef_payload.uri to: https://nfcfront3.vercel.app/t/{token}
+    """
+    if not getattr(user, "is_admin", 0):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    migrated = 0
+    try:
+        res = await db.execute("SELECT id, token, ndef_payload FROM nfc_tags")
+        rows = res.fetchall()
+        for r in rows:
+            id_, token_, payload = r[0], r[1], r[2]
+            try:
+                # payload may be a dict or JSON string
+                if isinstance(payload, str):
+                    p = json.loads(payload)
+                else:
+                    p = payload or {}
+            except Exception:
+                p = {}
+            p['uri'] = f"https://nfcfront3.vercel.app/t/{token_}"
+            await db.execute("UPDATE nfc_tags SET ndef_payload = :np WHERE id = :id", {"np": json.dumps(p), "id": str(id_)})
+            migrated += 1
+        await db.commit()
+    except Exception as exc:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=str(exc))
+    return {"migrated": migrated}
+
+
 @router.get("/shops")
 async def list_shops(db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
     # Admins see all shops; merchant users see only their shop
