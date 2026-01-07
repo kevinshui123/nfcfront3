@@ -1,6 +1,10 @@
 import axios from 'axios'
 
-const BACKEND_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001'
+// Resolve backend base URL with runtime fallback:
+// 1. window.__BACKEND_URL (can be injected at runtime without rebuilding)
+// 2. import.meta.env.VITE_BACKEND_URL (inlined at build time)
+// 3. default to localhost for dev
+const BACKEND_BASE = (typeof window !== 'undefined' && window.__BACKEND_URL) || import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001'
 const USE_MOCK = import.meta.env.VITE_MOCK === 'true'
 
 const apiClient = axios.create({
