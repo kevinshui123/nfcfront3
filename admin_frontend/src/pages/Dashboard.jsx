@@ -102,29 +102,27 @@ export default function Dashboard() {
         )}
       </Modal>
 
-      <div className="app-header">
-        <div style={{ position: 'relative', padding: '8px 0' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <div className="header-actions">
-              <div className="muted" style={{ marginRight: 12 }}>{(currentUser && currentUser.email) || '...'}</div>
-              <Space>
-                {currentUser && currentUser.is_admin ? (
-                  <Button
-                    type="primary"
-                    icon={<UserAddOutlined />}
-                    loading={creatingMerchant}
-                    onClick={handleCreateMerchant}
-                  >
-                    创建商户账号
-                  </Button>
-                ) : null}
-                <Button onClick={() => { localStorage.removeItem('access_token'); window.location.href = '/' }}>登出</Button>
-              </Space>
-            </div>
+      <div className="app-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="header-actions" style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="muted" style={{ marginRight: 12 }}>{(currentUser && currentUser.email) || '...'}</div>
+            <Space>
+              {currentUser && currentUser.is_admin ? (
+                <Button
+                  type="primary"
+                  icon={<UserAddOutlined />}
+                  loading={creatingMerchant}
+                  onClick={handleCreateMerchant}
+                >
+                  创建商户账号
+                </Button>
+              ) : null}
+              <Button onClick={() => { localStorage.removeItem('access_token'); window.location.href = '/' }}>登出</Button>
+            </Space>
           </div>
-          <div style={{ position: 'absolute', right: 0, top: 6 }}>
-            <TopControls />
-          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <TopControls />
         </div>
       </div>
       {/* Centered title (large, animated) */}

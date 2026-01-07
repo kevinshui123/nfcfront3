@@ -57,17 +57,15 @@ export default function MerchantDashboard() {
 
   return (
     <div style={{ padding: 24 }}>
-      <div className="app-header">
-        <div style={{ position: 'relative', padding: '8px 0' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <div className="header-actions">
-              <div className="muted" style={{ marginRight: 12 }}>merchant@{shop.name}</div>
-              <Button onClick={() => { localStorage.removeItem('access_token'); window.location.href = '/' }}>登出</Button>
-            </div>
+      <div className="app-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="header-actions" style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="muted" style={{ marginRight: 12 }}>merchant@{shop.name}</div>
+            <Button onClick={() => { localStorage.removeItem('access_token'); window.location.href = '/' }}>登出</Button>
           </div>
-          <div style={{ position: 'absolute', right: 0, top: 6 }}>
-            <TopControls />
-          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <TopControls />
         </div>
       </div>
   {/* For admin viewers show KPIs and content table; for merchant owners show a time-series chart instead */}
