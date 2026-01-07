@@ -106,18 +106,23 @@ export default function MerchantDashboard() {
     </>
   ) : (
     <Card className="table-card">
-      <h3 style={{ marginBottom: 12 }}>最近评论趋势（7 天）</h3>
-      {/* Build a simple 7-day series using today's visits as the last point */}
+      <h3 style={{ marginBottom: 12 }}>最近趋势（7 天）</h3>
+      {/* Replace admin content table with a statistics chart for both admin and merchant owners */}
       <AnimatedTimeSeries
         data={[
-          0,0,0,0,0, (visits || 0) - Math.floor((visits||0)/2),
+          Math.max(0, Math.floor((visits || 0) * 0.1)),
+          Math.max(0, Math.floor((visits || 0) * 0.25)),
+          Math.max(0, Math.floor((visits || 0) * 0.4)),
+          Math.max(0, Math.floor((visits || 0) * 0.6)),
+          Math.max(0, Math.floor((visits || 0) * 0.8)),
+          Math.max(0, Math.floor((visits || 0) * 0.9)),
           (visits || 0)
         ]}
         width={900}
-        height={220}
+        height={260}
         color="#7fd1ff"
       />
-      <div style={{ marginTop: 8, color: 'var(--muted)' }}>横轴：最近 7 天，纵轴：评论数（示例数据）</div>
+      <div style={{ marginTop: 8, color: 'var(--muted)' }}>横轴：最近 7 天，纵轴：访问/评论（示例数据）</div>
     </Card>
   )}
     </div>

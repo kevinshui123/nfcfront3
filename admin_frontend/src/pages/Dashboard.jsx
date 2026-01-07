@@ -105,9 +105,6 @@ export default function Dashboard() {
       <div className="app-header">
         <div className="brand">
           <div className="brand-logo"><div className="brand-initials">SZ</div></div>
-          <div>
-            <div className="brand-title">{t('brandTitleUpper')}</div>
-          </div>
         </div>
         <div style={{ position: 'relative' }}>
           <div className="header-actions">
@@ -131,6 +128,9 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+      {/* Centered title (large, animated) */}
+      <div className="center-page-title">SongZIke</div>
+
       {currentUser && currentUser.is_admin && (
         <Row gutter={[16,16]} style={{ marginBottom: 16 }}>
           <Col xs={24} sm={12} md={6}>

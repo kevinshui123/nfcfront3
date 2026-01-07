@@ -1409,6 +1409,30 @@ body {
 }
 .platform-chip:hover { transform: translateY(-4px) scale(1.02) }
 
+/* Centered page title for admin dashboard */
+.center-page-title {
+  text-align: center;
+  font-weight: 800;
+  font-size: 48px;
+  color: var(--primary);
+  margin: 18px 0 28px 0;
+  letter-spacing: 1px;
+  animation: float-vertical 4s ease-in-out infinite, shimmer 3s linear infinite;
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes float-vertical {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { text-shadow: 0 0 8px rgba(127,209,255,0.15), 0 0 24px rgba(127,209,255,0.08); }
+  50% { text-shadow: 0 0 18px rgba(127,209,255,0.25), 0 0 36px rgba(127,209,255,0.12); }
+  100% { text-shadow: 0 0 8px rgba(127,209,255,0.15), 0 0 24px rgba(127,209,255,0.08); }
+}
+
 /* card border and textarea colors for dark/light */
 textarea {
   background: var(--card-bg);
