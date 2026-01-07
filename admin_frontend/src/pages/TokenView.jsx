@@ -414,20 +414,20 @@ export default function TokenView() {
       // concise per-platform templates; language enforcement and truthfulness handled in system message
       const platformTemplates = {
         xiaohongshu: {
-          en: 'Write a natural, real-feeling Rednote review. Tone: friendly; length: medium; persona: {persona}. Use visible items only.',
-          zh: '为小红书写一条自然、真实的评价。语气友好；长度：中等；角色：{persona}。如有图片，仅使用图片中可见的菜名信息。'
+          en: 'Write a warm, natural Rednote review (casual personal voice). Use emojis, short anecdotes, and sensory words. Length: medium-long (2-3 short sentences). Use only visible items from the photo or facts given; avoid inventing dishes.',
+          zh: '为小红书写一条贴近生活、口语化的评价，带 emoji 和简短小故事/感受。长度：中偏长（2-3 句）。仅使用图片或信息中可见的菜品/事实，避免杜撰。'
         },
         douyin: {
-          en: 'Short punchy Douyin caption, concise, natural. Max ~40 words. Use visible items only.',
-          zh: '简短有力的抖音文案，精炼自然。不超过约40字。仅使用可见菜品信息。'
+          en: 'Short punchy Douyin caption, energetic and casual. Max ~40 words. Use visible items only; avoid exaggeration.',
+          zh: '简短有力的抖音文案，轻快口吻，约 40 字内。仅使用可见菜品信息，避免夸张。'
         },
         facebook: {
-          en: 'Short friendly Facebook review. Concise, factual, avoid exaggeration. Use visible items only.',
-          zh: '简短友好的 Facebook 点评。简洁、事实为主，避免夸张。仅使用可见菜品信息。'
+          en: 'Short friendly Facebook review. Concise, factual, avoid marketing language. Use visible items only.',
+          zh: '简短友好的 Facebook 点评，事实为主，避免商业化用语，仅使用可见菜品信息。'
         },
         instagram: {
-          en: 'Short Instagram caption with light emoji. Keep concise and truthful. Use visible items only.',
-          zh: '简短的 Instagram 文案，适量 emoji，真实简洁。仅使用可见菜品信息。'
+          en: 'Instagram-style caption: concise, visual, include light emoji and one hashtag. Keep natural and truthful; use visible items only.',
+          zh: 'Instagram 风格短文案，视觉化、可带少量 emoji 和一个话题标签，真实简洁，仅使用可见菜品信息。'
         },
         google: {
           en: 'Very short factual Google Maps review. 1–2 short sentences. No marketing or exaggeration. Use visible items only.',
@@ -453,9 +453,15 @@ export default function TokenView() {
           content: `${platformPreamble} ${langDirective} ${isZh ? briefZH : briefEN}`
         }
 
-        // small set of personas for variation
-        const personas = isZh ? ['一位满意的顾客', '学生', '上班族', '美食爱好者'] : ['a satisfied customer', 'a student', 'a working professional', 'a foodie']
+        // enhanced personas and length variability for stronger diversity
+        const personas = isZh
+          ? ['一位满意的顾客', '学生', '上班族', '美食爱好者', '路过试菜的顾客', '常客']
+          : ['a satisfied customer', 'a student', 'a working professional', 'a foodie', 'a passerby who tried it', 'a regular']
         const persona = personas[Math.floor(Math.random() * personas.length)]
+
+        // decide lengths per platform (xiaohongshu can be longer)
+        const lengthPool = platformId === 'xiaohongshu' ? ['medium','long','long'] : ['short','short','medium']
+        const lengthChoice = lengthPool[Math.floor(Math.random() * lengthPool.length)]
 
         const platformKey = platformId || 'instagram'
         // force English template for Google regardless of UI language
@@ -469,12 +475,19 @@ export default function TokenView() {
           const contentArray = [
             { type: 'text', text: `${userText}` },
             { type: 'image_url', image_url: { url: photoToUse } },
-            { type: 'text', text: isZh ? `角色：${persona}。请仅使用图片和上述信息中可见的菜名与事实，保持简洁，避免夸张。` : `Persona: ${persona}. Use only visible dishes and facts from the image or brief. Keep concise and avoid exaggeration.` }
+            { type: 'text', text: isZh ? `角色：${persona}。长度：${lengthChoice}。请仅使用图片和上述信息中可见的菜名与事实，保持真实、避免夸张。` : `Persona: ${persona}. Length: ${lengthChoice}. Use only visible dishes and facts from the image or brief. Keep it truthful and avoid exaggeration.` }
           ]
           return [system, { role: 'user', content: contentArray }]
         }
 
-        const userMsg = isZh ? `${userText} 角色：${persona}。请保持简洁、真实，不要杜撰菜品。` : `${userText} Persona: ${persona}. Keep it concise, truthful, and do not invent dishes.`
+        // For Google, ignore any Chinese userPrompt and always use English short template
+        let userMsg
+        if (platformId === 'google') {
+          // force English user message for Google
+          userMsg = platformTemplates.google.en + (isZh ? ' Respond in English.' : '')
+        } else {
+          userMsg = isZh ? `${userText} 角色：${persona}。长度：${lengthChoice}。请保持真实、不要杜撰菜品。` : `${userText} Persona: ${persona}. Length: ${lengthChoice}. Keep it truthful and do not invent dishes.`
+        }
         return [system, { role: 'user', content: userMsg }]
       }
 
