@@ -484,16 +484,13 @@ export default function TokenView() {
 
           // If Xiaohongshu, append an explicit instruction + example to force TITLE/BODY and emojis
           if (platformId === 'xiaohongshu') {
-            const xhsInsEn = `IMPORTANT: This must be a "探店" style Rednote with TITLE + BODY.
-OUTPUT FORMAT: one TITLE line prefixed with "TITLE:" (include 1-2 emojis), one blank line, then BODY.
-Tone: investigative and story-like — write as if you're guiding friends through a shop visit. BODY requirements: 5–8 short sentences (approx 140–260 characters), include sensory details, one short anecdote (e.g., ordering moment or photo moment), recommend 1 must-order dish, include an approximate per-person price, and include 8–12 emojis overall (title 1-2, body 6–10). Must include at least one location hashtag (#JHU or #Baltimore, or both when natural). VARY persona & wording each generation; avoid repeating phrases. Optionally mention the shop opened ~1 month ago when it fits. End with a one-line photo-caption suggestion. Do NOT invent dishes beyond visible items. Example:
-TITLE: 家人们！我在 JHU 附近发现宝藏小店啦🀄️📣
-
-BODY: 这家麻将小碗铺真的惊艳！麻将盒子超上镜📸，青椒牛肉分量刚好，酱香又下饭🍚。打饭台效率很高，奶茶柜台在门口右侧，店内装潢有氛围，人均约$8–$12。强烈推荐鸿运当头红烧肉🍖，拍照角度靠近麻将牌更好出片。#JHU #Baltimore 照片建议：侧光近拍突出牌面。`
-            const xhsInsZh = `要求：必须为探店风格，输出格式：单行标题前缀 "标题:"（标题含1-2个 emoji），空一行，然后正文。语气亲切带代入感，正文要求：5–8 个短句（约 140–260 字），包含感官描写、一个简短小故事/点单或拍照瞬间、推荐必点菜、估算人均价位，并在正文中使用 8–12 个 emoji（标题 1–2，正文 6–10）。正文必须包含至少一个地点标签（#JHU 或 #Baltimore），每次生成请变换角色与措辞，避免重复。可在合适情况下提到「店刚开约1个月」，但不要每次都写。最后给出一句照片构图建议。不要杜撰图片中没有的菜品。示例：
-标题: 家人们！JHU 附近发现宝藏麻将小碗铺🀄️📣
-
-正文: 今天去试了一家超有趣的小碗店，麻将盒子太好拍📸，青椒牛肉香辣恰到好处、分量适中🍛。打饭台很快，奶茶柜台在门口右侧，店内气氛很适合拍照打卡，人均约30元。强烈推荐鸿运当头红烧肉🍖！#JHU #Baltimore 照片建议：近景突出麻将牌盒子，底部留些环境光。`
+            // looser, more natural instruction for Xiaohongshu when images are present
+            const xhsInsEn = `Write a casual Rednote-style shop recommendation for Mahjong (TITLE + BODY).
+OUTPUT: one TITLE line prefixed by "TITLE:" (short; avoid hashtags in title), one blank line, then BODY.
+Tone: friendly and natural. Keep BODY to 3–6 short sentences. Emojis optional and use them naturally. Tags may be added at the end (optional). Mention sensory details and a short anecdote when helpful. Do not invent dishes beyond visible items. A one-line photo suggestion at the end is welcome.`
+            const xhsInsZh = `请写一条口语化的小红书探店推荐（标题 + 正文）。
+输出格式：单行标题，前缀为 "标题:"（简短，标题中尽量不要带话题标签），空一行，然后正文。
+语气自然亲切，正文 3–6 个短句即可，emoji 可选并自然使用。可在结尾追加若干话题标签（可选）。包含感官描写或一个小故事即可，但不要杜撰图片中没有的菜品。可附一句拍照建议。`
             contentArray.push({ type: 'text', text: isZh ? xhsInsZh : xhsInsEn })
           }
 
@@ -518,18 +515,13 @@ BODY: 家人们！今天挖到宝了～這家店的麻将盒子太好拍照了�
 
 正文: 家人们～今天挖到宝了！麻将饭盒超出片📸，红烧肉又香又软，性价比超高💰。#宝藏小店`
 
-          const promptXhsEn = `${platformTemplates.xiaohongshu.en} ${locationHint} IMPORTANT: This must be a "探店" style Rednote with TITLE + BODY.
-OUTPUT FORMAT: one TITLE line prefixed by "TITLE:" (include 1-2 emojis). TITLE MUST NOT CONTAIN any hashtags.
-One blank line, then BODY. BODY must end with a block of 2–4 hashtags (append as a single group at the end), chosen from this pool when relevant: #JHU #Baltimore #Foodie #探店 #小碗菜 #宝藏小店 #周末去哪儿 #打卡.
-Tone: personal, story-like, recommendation-focused. BODY requirements: 5–8 short sentences (approx 140–260 chars), include sensory details, one short anecdote (ordering or photo moment), recommend 1 must-order dish, and include an approximate per-person price. Use emojis liberally (title 1-2, body 6–10; total 8–12).
-Variation: choose a different narrative style each generation (anecdote, sensory, list-style tips, quick-recommendation) and vary persona/voice; avoid repeating phrasing.
-Do NOT invent dishes beyond visible items. Optionally mention "opened ~1 month" when natural. End with a one-line photo suggestion. ${exampleEn}`
+          const promptXhsEn = `${platformTemplates.xiaohongshu.en} ${locationHint} Write a casual Rednote-style shop recommendation for Mahjong (TITLE + BODY).
+OUTPUT: one TITLE line prefixed by "TITLE:" (short, avoid hashtags in title), one blank line, then BODY.
+Keep tone natural and friendly. BODY: 3–6 short sentences. Emojis optional. Tags (optional) may be appended at the end. Mention sensory details and a short anecdote if useful. Do not invent dishes beyond visible items. A one-line photo suggestion is welcome. ${exampleEn}`
 
-          const promptXhsZh = `${platformTemplates.xiaohongshu.zh} ${locationHint} 要求：必须为探店风格，输出格式：单行标题前缀 "标题:"（标题含1-2个 emoji），空一行，然后正文。标题中请不要包含任何标签或话题。
-正文结尾必须追加一组 2–4 个话题标签（作为一个块追加在最后），可从如下池子中选择：#JHU #Baltimore #Foodie #探店 #小碗菜 #宝藏小店 #周末去哪儿 #打卡。
-语气：亲切、讲故事式，正文要求：5–8 个短句（约 140–260 字），包含感官描写、一个简短小故事（点单或拍照瞬间）、推荐必点菜，并估算人均价。正文中请大量使用 emoji（标题 1–2，正文 6–10；总计 8–12）。
-多样性：每次生成时请随机选择不同的叙事风格（小故事、感官描写、清单式建议、快速推荐）并变换角色/语气，避免重复措辞。
-不要杜撰图片中没有的菜品。可在合适情况下提到「店刚开约1个月」。结尾请给出一句照片构图建议。${exampleZh}`
+          const promptXhsZh = `${platformTemplates.xiaohongshu.zh} ${locationHint} 请写一条口语化的小红书探店推荐（标题 + 正文）。
+输出格式：单行标题，前缀为 "标题:"（简短，标题中尽量不要放话题标签），空一行，然后正文。
+语气自然亲切，正文建议 3–6 个短句，emoji 可选并自然使用。可在结尾追加若干话题标签（可选）。可包含感官描写和一个简短小故事/点单或拍照瞬间，但不要杜撰图片中没有的菜品。可附一句拍照建议。${exampleZh}`
 
           userMsg = isZh ? promptXhsZh : promptXhsEn
         } else {
