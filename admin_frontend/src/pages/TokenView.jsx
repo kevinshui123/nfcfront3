@@ -485,12 +485,12 @@ export default function TokenView() {
           // If Xiaohongshu, append an explicit instruction + example to force TITLE/BODY and emojis
           if (platformId === 'xiaohongshu') {
             // looser, more natural instruction for Xiaohongshu when images are present
-            const xhsInsEn = `Write a casual Rednote-style shop recommendation for Mahjong (TITLE + BODY).
+            const xhsInsEn = `Write a Rednote-style shop recommendation for Mahjong (TITLE + BODY).
 OUTPUT: one TITLE line prefixed by "TITLE:" (short; avoid hashtags in title), one blank line, then BODY.
-Tone: friendly and natural. Keep BODY to 3–6 short sentences. Emojis optional and use them naturally. Tags may be added at the end (optional). Mention sensory details and a short anecdote when helpful. Do not invent dishes beyond visible items. A one-line photo suggestion at the end is welcome.`
-            const xhsInsZh = `请写一条口语化的小红书探店推荐（标题 + 正文）。
-输出格式：单行标题，前缀为 "标题:"（简短，标题中尽量不要带话题标签），空一行，然后正文。
-语气自然亲切，正文 3–6 个短句即可，emoji 可选并自然使用。可在结尾追加若干话题标签（可选）。包含感官描写或一个小故事即可，但不要杜撰图片中没有的菜品。可附一句拍照建议。`
+Do not restrict length — let the model choose. Each generation MUST be different in persona and wording; vary narrative style. Emojis and tags optional; no photo-suggestion text. Do not invent dishes beyond visible items.`
+            const xhsInsZh = `请写一条小红书探店/推荐（标题 + 正文）。
+输出：单行标题，前缀为 "标题:"（简短，标题中尽量不要带话题标签），空一行，然后正文。
+不要限制长度，让模型决定每条篇幅。每次生成必须不同（变换角色和叙事方式）。emoji 与话题可选。不要写拍照建议，不要杜撰图片中没有的菜品。`
             contentArray.push({ type: 'text', text: isZh ? xhsInsZh : xhsInsEn })
           }
 
@@ -515,13 +515,13 @@ BODY: 家人们！今天挖到宝了～這家店的麻将盒子太好拍照了�
 
 正文: 家人们～今天挖到宝了！麻将饭盒超出片📸，红烧肉又香又软，性价比超高💰。#宝藏小店`
 
-          const promptXhsEn = `${platformTemplates.xiaohongshu.en} ${locationHint} Write a casual Rednote-style shop recommendation for Mahjong (TITLE + BODY).
-OUTPUT: one TITLE line prefixed by "TITLE:" (short, avoid hashtags in title), one blank line, then BODY.
-Keep tone natural and friendly. BODY: 3–6 short sentences. Emojis optional. Tags (optional) may be appended at the end. Mention sensory details and a short anecdote if useful. Do not invent dishes beyond visible items. A one-line photo suggestion is welcome. ${exampleEn}`
+          const promptXhsEn = `${platformTemplates.xiaohongshu.en} ${locationHint} Write a Rednote-style shop recommendation for Mahjong (TITLE + BODY).
+OUTPUT: one TITLE line prefixed by "TITLE:" (short; avoid hashtags in title), one blank line, then BODY.
+Do not restrict length — let the model decide. Each generation MUST be different in persona and wording; vary narrative style. Emojis and tags optional; do not include any photo-suggestion text. Do not invent dishes beyond visible items. ${exampleEn}`
 
-          const promptXhsZh = `${platformTemplates.xiaohongshu.zh} ${locationHint} 请写一条口语化的小红书探店推荐（标题 + 正文）。
-输出格式：单行标题，前缀为 "标题:"（简短，标题中尽量不要放话题标签），空一行，然后正文。
-语气自然亲切，正文建议 3–6 个短句，emoji 可选并自然使用。可在结尾追加若干话题标签（可选）。可包含感官描写和一个简短小故事/点单或拍照瞬间，但不要杜撰图片中没有的菜品。可附一句拍照建议。${exampleZh}`
+          const promptXhsZh = `${platformTemplates.xiaohongshu.zh} ${locationHint} 请写一条小红书探店/推荐（标题 + 正文）。
+输出：单行标题，前缀为 "标题:"（简短，标题中尽量不要带话题标签），空一行，然后正文。
+不要限制长度，让模型决定每条篇幅。每次生成必须不同（变换角色和叙事方式）。Emoji 与话题可选。不要写拍照建议，不要杜撰图片中没有的菜品。${exampleZh}`
 
           userMsg = isZh ? promptXhsZh : promptXhsEn
         } else {
@@ -937,37 +937,43 @@ Keep tone natural and friendly. BODY: 3–6 short sentences. Emojis optional. Ta
               {step === 2 && (
                 <div className="step step-2" style={{ marginTop: 8 }}>
                   <div style={{ padding: 12, background: 'rgba(255,255,255,0.02)', borderRadius: 8, minHeight: 140, color: 'var(--text)' }}>
-                    {aiLoading ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', justifyContent: 'center', padding: 12 }}>
-                        <div className="ai-progress" style={{ width: '100%', maxWidth: 520 }}>
-                          <div className="ai-progress-track">
-                            <div className="ai-progress-fill" style={{ width: `${aiProgress}%` }} />
-                          </div>
-                          <div className="ai-progress-meta">
-                            <div className="ai-progress-percent">{Math.min(100, Math.floor(aiProgress))}%</div>
-                            <div className="ai-progress-note">{t('ai_generating')}</div>
+                    <>
+                      {aiTitle ? (
+                        <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center' }}>
+                          <div style={{ background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: 8, maxWidth: 640, width: '100%' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+                              <div style={{ fontWeight: 700, fontSize: 16, wordBreak: 'break-word' }}>{aiTitle}</div>
+                              <div>
+                                <Button onClick={() => {
+                                  try { navigator.clipboard.writeText(aiTitle); message.success(t('copied')) } catch(e){ message.error(t('copy_failed')) }
+                                }}>{t('copy_title') || '复制标题'}</Button>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ) : (aiResult && !String(aiResult).toLowerCase().includes('simul') && !String(aiResult).includes('模拟') && !String(aiResult).includes('SILRA_API_KEY')) ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                        {/* If a title was generated (Xiaohongshu), show it above the body with a copy button */}
-                        {aiTitle ? (
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexDirection: 'column' }}>
-                            <div style={{ fontWeight: 700, fontSize: 18, textAlign: 'center' }}>{aiTitle}</div>
-                            <Button onClick={() => {
-                              try { navigator.clipboard.writeText(aiTitle); message.success(t('copied')) } catch(e){ message.error(t('copy_failed')) }
-                            }}>{t('copy_title') || '复制标题'}</Button>
+                      ) : null}
+
+                      {aiLoading ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', justifyContent: 'center', padding: 12 }}>
+                          <div className="ai-progress" style={{ width: '100%', maxWidth: 520 }}>
+                            <div className="ai-progress-track">
+                              <div className="ai-progress-fill" style={{ width: `${aiProgress}%` }} />
+                            </div>
+                            <div className="ai-progress-meta">
+                              <div className="ai-progress-percent">{Math.min(100, Math.floor(aiProgress))}%</div>
+                              <div className="ai-progress-note">{t('ai_generating')}</div>
+                            </div>
                           </div>
-                        ) : null}
+                        </div>
+                      ) : (aiResult && !String(aiResult).toLowerCase().includes('simul') && !String(aiResult).includes('模拟') && !String(aiResult).includes('SILRA_API_KEY')) ? (
                         <div style={{ whiteSpace: 'pre-wrap' }}>{aiResult}</div>
-                      </div>
-                    ) : (
-                      // placeholder prompting user to click generate
-                      <div style={{ height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)' }}>
-                        {t('click_generate_review') || '点击生成评价'}
-                      </div>
-                    )}
+                      ) : (
+                        // placeholder prompting user to click generate
+                        <div style={{ height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)' }}>
+                          {t('click_generate_review') || '点击生成评价'}
+                        </div>
+                      )}
+                    </>
                     {/* Single copy button below results */}
                     <div style={{ marginTop: 8, display: 'flex', justifyContent: 'center' }}>
                       <Button onClick={() => {
