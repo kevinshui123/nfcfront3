@@ -26,7 +26,7 @@ export default function TopControls() {
   }, [theme])
 
   return (
-    <div className="top-controls" aria-hidden="false" style={{ display: 'flex', alignItems: 'center' }}>
+    <div className="top-controls" aria-hidden="false" style={{ display: 'flex', alignItems: 'center', marginTop: -1 }}>
       {/* Theme toggle removed; app uses dark theme only */}
       <Tooltip title={lang === 'en' ? 'Switch to 中文' : '切换到 English'}>
         <Button
