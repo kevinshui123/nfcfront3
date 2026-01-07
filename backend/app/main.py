@@ -163,6 +163,15 @@ async def ai_generate(payload: AIGenerateRequest, request: Request, db: AsyncSes
 from .admin_routes import router as admin_router
 app.include_router(admin_router, prefix="/api")
 
+# Backwards-compatible quick endpoint to return current user info.
+# Some deployments may not pick up admin router changes; expose /api/me directly here.
+from .auth import get_current_user
+from fastapi import Depends
+
+@app.get("/api/me")
+async def api_me(user=Depends(get_current_user)):
+    return {"email": getattr(user, "email", None), "is_admin": getattr(user, "is_admin", 0), "shop_id": getattr(user, "shop_id", None)}
+
 @app.get("/api/debug/users")
 async def debug_users(db: AsyncSession = Depends(get_db)):
     if __import__('os').getenv("ENV", "dev") != "dev":

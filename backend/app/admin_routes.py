@@ -129,6 +129,14 @@ async def create_merchant(db: AsyncSession = Depends(get_db), user=Depends(get_c
     return {"username": username, "password": password, "shop_id": shop_id}
 
 
+@router.get("/me")
+async def get_me(user=Depends(get_current_user)):
+    """
+    Return current authenticated user's basic info.
+    """
+    return {"email": getattr(user, "email", None), "is_admin": getattr(user, "is_admin", 0), "shop_id": getattr(user, "shop_id", None)}
+
+
 @router.get("/shops")
 async def list_shops(db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
     # Admins see all shops; merchant users see only their shop

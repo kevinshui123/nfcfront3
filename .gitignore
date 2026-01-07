@@ -10,3 +10,4 @@ release/*.zip
 *.log
 __pycache__/
 *.pyc
+.vercel
