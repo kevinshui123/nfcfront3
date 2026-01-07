@@ -5,6 +5,8 @@ import { getMerchantData } from '../api'
 import { useNavigate, useParams } from 'react-router-dom'
 import TopControls from '../components/TopControls'
 import { t } from '../i18n'
+import AnimatedTimeSeries from '../components/AnimatedTimeSeries'
+import { getCurrentUser } from '../api'
 
 export default function MerchantDashboard() {
   const { id } = useParams()
@@ -27,7 +29,14 @@ export default function MerchantDashboard() {
     return ()=> mounted = false
   }, [id])
 
-  if (!data) {
+  const [currentUser, setCurrentUser] = useState(null)
+  useEffect(() => {
+    let mounted = true
+    getCurrentUser().then(u => { if (mounted) setCurrentUser(u) }).catch(()=>{})
+    return () => mounted = false
+  }, [])
+
+  if (!data || currentUser === null) {
     return <div style={{ textAlign: 'center', padding: 40 }}><Spin size="large" /></div>
   }
 
@@ -53,7 +62,6 @@ export default function MerchantDashboard() {
           <div className="brand-logo"><div className="brand-initials">SZ</div></div>
           <div>
             <div className="brand-title">{shop.name}</div>
-            <div className="muted">商户控制台</div>
           </div>
         </div>
         <div style={{ position: 'relative' }}>
@@ -66,6 +74,9 @@ export default function MerchantDashboard() {
           </div>
         </div>
       </div>
+  {/* For admin viewers show KPIs and content table; for merchant owners show a time-series chart instead */}
+  {currentUser && currentUser.is_admin ? (
+    <>
       <Row gutter={[16,16]} style={{ marginBottom: 16 }}>
         <Col xs={24} sm={12} md={8}>
           <Card className="kpi-card animated">
@@ -92,6 +103,23 @@ export default function MerchantDashboard() {
           )}
         </Space>
       </Card>
+    </>
+  ) : (
+    <Card className="table-card">
+      <h3 style={{ marginBottom: 12 }}>最近评论趋势（7 天）</h3>
+      {/* Build a simple 7-day series using today's visits as the last point */}
+      <AnimatedTimeSeries
+        data={[
+          0,0,0,0,0, (visits || 0) - Math.floor((visits||0)/2),
+          (visits || 0)
+        ]}
+        width={900}
+        height={220}
+        color="#7fd1ff"
+      />
+      <div style={{ marginTop: 8, color: 'var(--muted)' }}>横轴：最近 7 天，纵轴：评论数（示例数据）</div>
+    </Card>
+  )}
     </div>
   )
 }
