@@ -102,7 +102,7 @@ export default function Dashboard() {
         )}
       </Modal>
 
-      <div className="app-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0' }}>
+      <div className="app-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '14px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div className="header-actions" style={{ display: 'flex', alignItems: 'center' }}>
             <div className="muted" style={{ marginRight: 12 }}>{(currentUser && currentUser.email) || '...'}</div>
@@ -121,7 +121,7 @@ export default function Dashboard() {
             </Space>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', marginTop: 4 }}>
           <TopControls />
         </div>
       </div>
