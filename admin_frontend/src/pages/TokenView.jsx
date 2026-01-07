@@ -495,6 +495,9 @@ export default function TokenView() {
       const language = (localStorage.getItem('sz_lang') || 'en') === 'zh' ? 'Chinese' : 'English'
       const messages = buildMessages(platformId, language, prompt || (content && content.title) || t('ai_prompt_default'), (photos && photos.length) ? photos : photoUrl)
 
+      // Debug: log messages payload to help diagnose language issues
+      try { console.debug('AI messages payload:', JSON.parse(JSON.stringify(messages))) } catch(e) {}
+
       const body = {
         model: 'qwen3-vl-plus',
         messages,
