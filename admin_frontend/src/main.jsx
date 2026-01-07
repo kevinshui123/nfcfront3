@@ -43,8 +43,8 @@ function App() {
         <Route path="/merchant/:id" element={isAuth() ? <MerchantDashboard /> : <Navigate to="/login" replace />} />
         <Route path="/t/:token" element={<TokenView />} />
         <Route path="/t/:token/publish/:platform" element={<PublishPage />} />
-        <Route path="/tags" element={token ? <TagsPage /> : <Navigate to="/login" replace />} />
-        <Route path="*" element={<Navigate to={token ? "/dashboard" : "/login"} replace />} />
+        <Route path="/tags" element={isAuth() ? <TagsPage /> : <Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to={isAuth() ? "/dashboard" : "/login"} replace />} />
       </Routes>
     </BrowserRouter>
     </ConfigProvider>
