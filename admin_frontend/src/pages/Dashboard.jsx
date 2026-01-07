@@ -107,7 +107,6 @@ export default function Dashboard() {
           <div className="brand-logo"><div className="brand-initials">SZ</div></div>
           <div>
             <div className="brand-title">{t('brandTitleUpper')}</div>
-            <div className="muted">{t('brandSubtitle')}</div>
           </div>
         </div>
         <div style={{ position: 'relative' }}>

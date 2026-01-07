@@ -168,7 +168,7 @@ export async function getMerchantData(shopId) {
       ]
     }
   }
-  const resp = await apiClient.get(`/merchant/${shopId}`)
+  const resp = await apiClient.get(`/api/merchant/${shopId}`)
   return resp.data
 }
 
