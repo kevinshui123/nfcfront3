@@ -28,7 +28,13 @@ app = FastAPI(title="AllValue Link Backend (scaffold)")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    # Restrict to the known frontend origins in production; allow * for other envs if needed
+    allow_origins=[
+        "https://nfcfront3.vercel.app",
+        "https://adminfrontend-six.vercel.app",
+        "https://nfcfront3-git-main-kevinshuis-projects.vercel.app",
+        "https://adminfrontend-git-main-kevinshuis-projects.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
