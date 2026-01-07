@@ -86,7 +86,7 @@ async def batch_encode(shop_id: str, payload: BatchEncodeRequest, db: AsyncSessi
         }
         # Insert via raw SQL or ORM model creation
         await db.execute(
-            "INSERT INTO nfc_tags (id, shop_id, token, ndef_payload, status, created_at) VALUES (:id, :shop_id, :token, :ndef_payload::json, :status, now())",
+            "INSERT INTO nfc_tags (id, shop_id, token, ndef_payload, status, created_at) VALUES (:id, :shop_id, :token, :ndef_payload, :status, CURRENT_TIMESTAMP)",
             {
                 "id": str(tagsql["id"]),
                 "shop_id": str(tagsql["shop_id"]),
@@ -115,10 +115,10 @@ async def create_merchant(db: AsyncSession = Depends(get_db), user=Depends(get_c
     username = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
     password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
 
-    # Create a new shop for this merchant
+    # Create a new shop for this merchant (use CURRENT_TIMESTAMP for compatibility)
     shop_id = str(uuid.uuid4())
     await db.execute(
-        "INSERT INTO shops (id, name, created_at) VALUES (:id, :name, now())",
+        "INSERT INTO shops (id, name, created_at) VALUES (:id, :name, CURRENT_TIMESTAMP)",
         {"id": shop_id, "name": f"Shop {username}"}
     )
 
