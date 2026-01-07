@@ -59,8 +59,8 @@ export default function MerchantDashboard() {
     <div style={{ padding: 24 }}>
       <div className="app-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div className="header-actions" style={{ display: 'flex', alignItems: 'center' }}>
-            <div className="muted" style={{ marginRight: 12 }}>merchant@{shop.name}</div>
+          <div className="header-actions" style={{ display: 'flex', alignItems: 'center', height: 36 }}>
+            <div className="muted" style={{ marginRight: 12, lineHeight: '36px' }}>merchant@{shop.name}</div>
             <Button onClick={() => { localStorage.removeItem('access_token'); window.location.href = '/' }}>登出</Button>
           </div>
         </div>
