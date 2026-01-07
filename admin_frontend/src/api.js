@@ -168,7 +168,11 @@ export async function getMerchantData(shopId) {
       ]
     }
   }
-  const resp = await apiClient.get(`/api/merchant/${shopId}`)
+  // Some browsers/extensions may alter XHR; include explicit Authorization header as a fallback
+  const explicitHeaders = {}
+  const localToken = (typeof window !== 'undefined') ? localStorage.getItem('access_token') : null
+  if (localToken) explicitHeaders.Authorization = `Bearer ${localToken}`
+  const resp = await apiClient.get(`/api/merchant/${shopId}`, { headers: explicitHeaders })
   return resp.data
 }
 
