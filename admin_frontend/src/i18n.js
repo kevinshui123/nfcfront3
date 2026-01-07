@@ -50,6 +50,7 @@ const translations = {
     ,photos_needed_notify: '还需拍摄更多照片'
     ,click_generate_review: '点击生成评价'
     ,map_title: '位置'
+    ,copy_title: '复制标题'
   },
   en: {
     brandTitle: 'Songzike Tool',
@@ -105,6 +106,7 @@ const translations = {
     ,photos_needed_notify: 'Please take more photos'
     ,click_generate_review: 'Click to generate review'
     ,map_title: 'Location'
+    ,copy_title: 'Copy title'
   }
 }
 

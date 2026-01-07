@@ -35,6 +35,7 @@ export default function TokenView() {
   const [selected, setSelected] = useState([])
   const [prompt, setPrompt] = useState('')
   const [aiResult, setAiResult] = useState(null)
+  const [aiTitle, setAiTitle] = useState(null)
   const [photoUrl, setPhotoUrl] = useState(null)
   const [photos, setPhotos] = useState([]) // accumulate up to 3 photos
   const [aiLoading, setAiLoading] = useState(false)
@@ -484,7 +485,13 @@ export default function TokenView() {
         let userMsg
         if (platformId === 'google') {
           // force English user message for Google
-          userMsg = platformTemplates.google.en + (isZh ? ' Respond in English.' : '')
+          userMsg = platformTemplates.google.en + ' Respond in English.'
+        } else if (platformId === 'xiaohongshu') {
+          // Xiaohongshu: request a title and body, emojis allowed but avoid over-exaggeration.
+          const locationHint = Math.random() < 0.35 ? (isZh ? '店铺位于 Baltimore，靠近 JHU。' : 'The shop is located in Baltimore near JHU.') : ''
+          const promptXhsEn = `${platformTemplates.xiaohongshu.en} ${locationHint} OUTPUT_FORMAT: Start with a short catchy TITLE line prefixed by "TITLE:" then a blank line and the BODY. Use emoji, casual voice, sensory words, and a short hashtag. Avoid inventing dishes beyond visible items.`
+          const promptXhsZh = `${platformTemplates.xiaohongshu.zh} ${locationHint} 输出格式：先写一行简短吸睛的标题，前缀为 "标题:"，空一行，然后写正文。可使用 emoji 和口语化语气，避免杜撰。`
+          userMsg = isZh ? promptXhsZh : promptXhsEn
         } else {
           userMsg = isZh ? `${userText} 角色：${persona}。长度：${lengthChoice}。请保持真实、不要杜撰菜品。` : `${userText} Persona: ${persona}. Length: ${lengthChoice}. Keep it truthful and do not invent dishes.`
         }
@@ -523,13 +530,14 @@ export default function TokenView() {
         return
       }
 
-      // If response is streaming, read incrementally
+        // If response is streaming, read incrementally
       if (resp.body && resp.body.getReader) {
         const reader = resp.body.getReader()
         const decoder = new TextDecoder('utf-8')
         let done = false
         let buffer = ''
-        setAiResult('') // reset
+          setAiResult('') // reset
+          setAiTitle(null)
         while (!done) {
           const { value, done: d } = await reader.read()
           done = d
@@ -562,8 +570,20 @@ export default function TokenView() {
             }
           }
         }
-        // finished
+        // finished - parse possible TITLE: / 标题:
         await new Promise(res => setTimeout(res, 120))
+        try {
+          const txt = aiResult || ''
+          const titleMatchEn = txt.match(/TITLE:\\s*(.+?)\\s*\\n\\s*BODY:\\s*([\\s\\S]+)/i)
+          const titleMatchZh = txt.match(/标题[:：]\\s*(.+?)\\s*\\n\\s*正文[:：]?\\s*([\\s\\S]+)/i)
+          if (titleMatchEn) {
+            setAiTitle(titleMatchEn[1].trim())
+            setAiResult(titleMatchEn[2].trim())
+          } else if (titleMatchZh) {
+            setAiTitle(titleMatchZh[1].trim())
+            setAiResult(titleMatchZh[2].trim())
+          }
+        } catch(e){}
         message.success(t('ai_generated'))
       } else {
         // fallback to full json
@@ -579,7 +599,20 @@ export default function TokenView() {
         } catch (e) {
           text = JSON.stringify(data)
         }
-        setAiResult(text)
+        // parse title/body if present
+        try {
+          const titleMatchEn = text.match(/TITLE:\\s*(.+?)\\s*\\n\\s*BODY:\\s*([\\s\\S]+)/i)
+          const titleMatchZh = text.match(/标题[:：]\\s*(.+?)\\s*\\n\\s*正文[:：]?\\s*([\\s\\S]+)/i)
+          if (titleMatchEn) {
+            setAiTitle(titleMatchEn[1].trim())
+            setAiResult(titleMatchEn[2].trim())
+          } else if (titleMatchZh) {
+            setAiTitle(titleMatchZh[1].trim())
+            setAiResult(titleMatchZh[2].trim())
+          } else {
+            setAiResult(text)
+          }
+        } catch(e){ setAiResult(text) }
         message.success(t('ai_generated'))
       }
     } catch (e) {
@@ -834,6 +867,15 @@ export default function TokenView() {
                       </div>
                     ) : (aiResult && !String(aiResult).toLowerCase().includes('simul') && !String(aiResult).includes('模拟') && !String(aiResult).includes('SILRA_API_KEY')) ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                        {/* If a title was generated (Xiaohongshu), show it above the body with a copy button */}
+                        {aiTitle ? (
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexDirection: 'column' }}>
+                            <div style={{ fontWeight: 700, fontSize: 18, textAlign: 'center' }}>{aiTitle}</div>
+                            <Button onClick={() => {
+                              try { navigator.clipboard.writeText(aiTitle); message.success(t('copied')) } catch(e){ message.error(t('copy_failed')) }
+                            }}>{t('copy_title') || '复制标题'}</Button>
+                          </div>
+                        ) : null}
                         <div style={{ whiteSpace: 'pre-wrap' }}>{aiResult}</div>
                       </div>
                     ) : (
