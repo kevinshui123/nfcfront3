@@ -473,11 +473,28 @@ export default function TokenView() {
         // attach only first photo to reduce payload; instruct model to use visible info only
         const photoToUse = Array.isArray(photo) ? photo[0] : photo
         if (photoToUse) {
+          const baseInstruction = isZh
+            ? `角色：${persona}。长度：${lengthChoice}。请仅使用图片和上述信息中可见的菜名与事实，保持真实、避免夸张。`
+            : `Persona: ${persona}. Length: ${lengthChoice}. Use only visible dishes and facts from the image or brief. Keep it truthful and avoid exaggeration.`
           const contentArray = [
             { type: 'text', text: `${userText}` },
             { type: 'image_url', image_url: { url: photoToUse } },
-            { type: 'text', text: isZh ? `角色：${persona}。长度：${lengthChoice}。请仅使用图片和上述信息中可见的菜名与事实，保持真实、避免夸张。` : `Persona: ${persona}. Length: ${lengthChoice}. Use only visible dishes and facts from the image or brief. Keep it truthful and avoid exaggeration.` }
+            { type: 'text', text: baseInstruction }
           ]
+
+          // If Xiaohongshu, append an explicit instruction + example to force TITLE/BODY and emojis
+          if (platformId === 'xiaohongshu') {
+            const xhsInsEn = `IMPORTANT: OUTPUT MUST be exactly: one TITLE line prefixed with "TITLE:" (include 1-2 emojis), one blank line, then BODY. Use casual voice (e.g., "家人们"), include emojis (3-6 in body), sensory words, and one short hashtag. Do NOT invent dishes beyond visible items. Example:
+TITLE: I declare 📣 this is the "雀神" of small-bowl dishes! 🀄️💥
+
+BODY: 家人们！今天挖到宝了～這家店的麻将盒子太好拍照了📸，味道也在线。#小碗菜探店`
+            const xhsInsZh = `要求：输出格式必须为：单行标题前缀 "标题:"（标题含1-2个emoji），空一行，然后正文。使用口语化语气（如“家人们”），正文中使用3-6个emoji，加入感官词和短标签。不要杜撰图片中没有的菜品。示例：
+标题: 我宣布📣这就是小碗菜界的“雀神”🀄️！
+
+正文: 家人们～今天挖到宝了！麻将饭盒超出片📸，红烧肉又香又软。#宝藏小店`
+            contentArray.push({ type: 'text', text: isZh ? xhsInsZh : xhsInsEn })
+          }
+
           return [system, { role: 'user', content: contentArray }]
         }
 
