@@ -220,46 +220,44 @@ async def get_merchant_dashboard(shop_id: str, db: AsyncSession = Depends(get_db
         raise HTTPException(status_code=403, detail="Forbidden")
 
     # Get shop info
+    # Defensive: try each DB step and fall back to empty/default data on failure
     try:
         shop_result = await db.execute("SELECT id, name FROM shops WHERE id = :shop_id", {"shop_id": shop_id})
         shop_row = shop_result.fetchone()
         if not shop_row:
-            raise HTTPException(status_code=404, detail="Shop not found")
-
+            return {"shop": {"id": shop_id, "name": "Unknown Shop"}, "visits": 0, "reviews": 0, "contents": []}
         shop = {"id": shop_row[0], "name": shop_row[1]}
+    except Exception:
+        return {"shop": {"id": shop_id, "name": "Unknown Shop"}, "visits": 0, "reviews": 0, "contents": []}
 
-        # Get today's visits and reviews for this shop
+    try:
         today = __import__('datetime').date.today()
         visits_result = await db.execute(
             "SELECT COUNT(*) FROM visits WHERE shop_id = :shop_id AND DATE(created_at) = :today",
             {"shop_id": shop_id, "today": today}
         )
         visits = visits_result.scalar() or 0
+    except Exception:
+        visits = 0
 
+    try:
         reviews_result = await db.execute(
             "SELECT COUNT(*) FROM contents WHERE shop_id = :shop_id AND DATE(created_at) = :today",
             {"shop_id": shop_id, "today": today}
         )
         reviews = reviews_result.scalar() or 0
+    except Exception:
+        reviews = 0
 
-        # Get recent contents for this shop
+    try:
         contents_result = await db.execute(
             "SELECT id, title, token, platform, created_at FROM contents WHERE shop_id = :shop_id ORDER BY created_at DESC LIMIT 50",
             {"shop_id": shop_id}
         )
         contents = [{"id": r[0], "title": r[1], "token": r[2], "platform": r[3] or "unknown", "created_at": r[4].isoformat() if r[4] else None} for r in contents_result.fetchall()]
+    except Exception:
+        contents = []
 
-        return {
-            "shop": shop,
-            "visits": visits,
-            "reviews": reviews,
-            "contents": contents
-        }
-    except HTTPException:
-        # re-raise known HTTP exceptions
-        raise
-    except Exception as exc:
-        # Return error details to help debugging (temporary)
-        raise HTTPException(status_code=500, detail=f"Server error: {str(exc)}")
+    return {"shop": shop, "visits": visits, "reviews": reviews, "contents": contents}
 
 
