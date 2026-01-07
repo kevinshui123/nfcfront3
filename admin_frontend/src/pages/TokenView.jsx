@@ -487,10 +487,22 @@ export default function TokenView() {
           // force English user message for Google
           userMsg = platformTemplates.google.en + ' Respond in English.'
         } else if (platformId === 'xiaohongshu') {
-          // Xiaohongshu: request a title and body, emojis allowed but avoid over-exaggeration.
+          // Xiaohongshu: strongly request TITLE + BODY with emojis and casual voice.
+          // Force examples and explicit emoji counts to encourage emoji usage.
           const locationHint = Math.random() < 0.35 ? (isZh ? '店铺位于 Baltimore，靠近 JHU。' : 'The shop is located in Baltimore near JHU.') : ''
-          const promptXhsEn = `${platformTemplates.xiaohongshu.en} ${locationHint} OUTPUT_FORMAT: Start with a short catchy TITLE line prefixed by "TITLE:" then a blank line and the BODY. Use emoji, casual voice, sensory words, and a short hashtag. Avoid inventing dishes beyond visible items.`
-          const promptXhsZh = `${platformTemplates.xiaohongshu.zh} ${locationHint} 输出格式：先写一行简短吸睛的标题，前缀为 "标题:"，空一行，然后写正文。可使用 emoji 和口语化语气，避免杜撰。`
+          const exampleEn = `EXAMPLES:
+TITLE: I declare 📣 this is the "雀神" of small-bowl dishes! 🀄️💥
+
+BODY: 家人们！今天挖到宝了～這家店的麻将盒子太好拍照了📸，味道也在线，鸿运当头红烧肉超下饭😍。#小碗菜探店`
+          const exampleZh = `示例：
+标题: 我宣布📣这就是小碗菜界的“雀神”🀄️！
+
+正文: 家人们～今天挖到宝了！麻将饭盒超出片📸，红烧肉又香又软，性价比超高💰。#宝藏小店`
+
+          const promptXhsEn = `${platformTemplates.xiaohongshu.en} ${locationHint} IMPORTANT: OUTPUT FORMAT MUST be exactly: a single TITLE line prefixed by "TITLE:" (include at least 1-2 emojis in the title), one blank line, then BODY. Use casual, friendly voice (e.g. start with "家人们" or "大家好"), include emojis liberally (at least 2 in title, 3-6 in body), sensory words, a short hashtag. Do NOT invent dishes beyond what is visible in the photos. Keep factual. ${exampleEn}`
+
+          const promptXhsZh = `${platformTemplates.xiaohongshu.zh} ${locationHint} 要求：输出格式必须是：单行标题，前缀为 "标题:"（标题中至少包含1-2个 emoji），空一行，接着正文。使用口语化、亲切的语气（例如“家人们”），正文中请适量使用 emoji（3-6 个），加入感官词和短标签。不要杜撰图片中没有的菜品。${exampleZh}`
+
           userMsg = isZh ? promptXhsZh : promptXhsEn
         } else {
           userMsg = isZh ? `${userText} 角色：${persona}。长度：${lengthChoice}。请保持真实、不要杜撰菜品。` : `${userText} Persona: ${persona}. Length: ${lengthChoice}. Keep it truthful and do not invent dishes.`
