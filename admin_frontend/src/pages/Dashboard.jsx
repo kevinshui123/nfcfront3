@@ -121,7 +121,7 @@ export default function Dashboard() {
             </Space>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'flex-start', marginTop: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', alignSelf: 'flex-start', marginTop: 0 }}>
           <TopControls />
         </div>
       </div>
