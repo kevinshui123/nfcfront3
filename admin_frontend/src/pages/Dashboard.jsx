@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Card, Table, Button, Spin, Row, Col, Statistic, Space, Modal, message, Alert } from 'antd'
 import { ArrowUpOutlined, ArrowDownOutlined, UserAddOutlined } from '@ant-design/icons'
-import { getMerchants, createMerchant } from '../api'
+import { getMerchants, createMerchant, getCurrentUser } from '../api'
 import { useNavigate } from 'react-router-dom'
 import TopControls from '../components/TopControls'
 import { t } from '../i18n'
@@ -18,6 +18,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [creatingMerchant, setCreatingMerchant] = useState(false)
   const [newMerchantCredentials, setNewMerchantCredentials] = useState(null)
+  const [currentUser, setCurrentUser] = useState(null)
 
   useEffect(() => {
     let mounted = true
@@ -26,6 +27,12 @@ export default function Dashboard() {
       .catch(() => {})
       .finally(()=> { if (mounted) setLoading(false) })
     return ()=> mounted = false
+  }, [])
+
+  useEffect(() => {
+    let mounted = true
+    getCurrentUser().then(u => { if (mounted) setCurrentUser(u) }).catch(()=>{})
+    return () => mounted = false
   }, [])
 
   const handleCreateMerchant = async () => {
@@ -105,16 +112,18 @@ export default function Dashboard() {
         </div>
         <div style={{ position: 'relative' }}>
           <div className="header-actions">
-            <div className="muted">admin@example.com</div>
+            <div className="muted">{(currentUser && currentUser.email) || '...'}</div>
             <Space>
-              <Button
-                type="primary"
-                icon={<UserAddOutlined />}
-                loading={creatingMerchant}
-                onClick={handleCreateMerchant}
-              >
-                创建商户账号
-              </Button>
+              {currentUser && currentUser.is_admin ? (
+                <Button
+                  type="primary"
+                  icon={<UserAddOutlined />}
+                  loading={creatingMerchant}
+                  onClick={handleCreateMerchant}
+                >
+                  创建商户账号
+                </Button>
+              ) : null}
               <Button onClick={() => { localStorage.removeItem('access_token'); window.location.href = '/' }}>登出</Button>
             </Space>
           </div>
@@ -123,37 +132,41 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-      <Row gutter={[16,16]} style={{ marginBottom: 16 }}>
-        <Col xs={24} sm={12} md={6}>
-          <Card className="kpi-card animated">
-            <Statistic title="总访客 (今日)" value={totalVisits} prefix={<ArrowUpOutlined />} />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card className="kpi-card animated">
-            <Statistic title="总评价 (今日)" value={totalReviews} />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card className="kpi-card animated">
-            <Statistic title="平均/店" value={avgPerShop} />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card className="kpi-card animated">
-            <Statistic title="商家数" value={merchants.length} suffix="家" />
-          </Card>
-        </Col>
-      </Row>
+      {currentUser && currentUser.is_admin && (
+        <Row gutter={[16,16]} style={{ marginBottom: 16 }}>
+          <Col xs={24} sm={12} md={6}>
+            <Card className="kpi-card animated">
+              <Statistic title="总访客 (今日)" value={totalVisits} prefix={<ArrowUpOutlined />} />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card className="kpi-card animated">
+              <Statistic title="总评价 (今日)" value={totalReviews} />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card className="kpi-card animated">
+              <Statistic title="平均/店" value={avgPerShop} />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card className="kpi-card animated">
+              <Statistic title="商家数" value={merchants.length} suffix="家" />
+            </Card>
+          </Col>
+        </Row>
+      )}
 
-      <Card className="table-card">
-        <Space direction="vertical" style={{ width: '100%' }}>
-          <h3 style={{ margin: 0 }}>商家列表</h3>
-          {loading ? <div style={{ textAlign: 'center', padding: 40 }}><Spin /></div> : (
-            <Table dataSource={dataSource} columns={columns} pagination={{ pageSize: 8 }} rowKey="id" />
-          )}
-        </Space>
-      </Card>
+      {currentUser && currentUser.is_admin && (
+        <Card className="table-card">
+          <Space direction="vertical" style={{ width: '100%' }}>
+            <h3 style={{ margin: 0 }}>商家列表</h3>
+            {loading ? <div style={{ textAlign: 'center', padding: 40 }}><Spin /></div> : (
+              <Table dataSource={dataSource} columns={columns} pagination={{ pageSize: 8 }} rowKey="id" />
+            )}
+          </Space>
+        </Card>
+      )}
     </div>
   )
 }

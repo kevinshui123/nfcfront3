@@ -23,7 +23,19 @@ export default function LoginPage() {
         // store token via api helper
         setAccessToken(data.access_token)
         message.success('登录成功')
-        navigate('/dashboard')
+        // fetch current user and redirect based on role
+        try {
+          const me = await (await import('../api')).getCurrentUser()
+          if (me && me.is_admin) {
+            navigate('/dashboard')
+          } else if (me && me.shop_id) {
+            navigate(`/merchant/${me.shop_id}`)
+          } else {
+            navigate('/dashboard')
+          }
+        } catch (e) {
+          navigate('/dashboard')
+        }
       } else {
         message.error('登录失败')
       }

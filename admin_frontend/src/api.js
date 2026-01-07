@@ -90,6 +90,19 @@ export function logout() {
 
 export default apiClient
 
+export async function getCurrentUser() {
+  if (USE_MOCK) {
+    return { email: 'admin@example.com', is_admin: 1, shop_id: null }
+  }
+  try {
+    const resp = await apiClient.get('/api/me')
+    return resp.data
+  } catch (e) {
+    console.error('getCurrentUser failed', e)
+    return null
+  }
+}
+
 export async function aiGenerate(payload) {
   if (USE_MOCK) {
     return { raw: { mock: true, text: '这是模拟 AI 文案' } }
