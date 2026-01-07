@@ -518,9 +518,18 @@ BODY: 家人们！今天挖到宝了～這家店的麻将盒子太好拍照了�
 
 正文: 家人们～今天挖到宝了！麻将饭盒超出片📸，红烧肉又香又软，性价比超高💰。#宝藏小店`
 
-          const promptXhsEn = `${platformTemplates.xiaohongshu.en} ${locationHint} IMPORTANT: This must be a "探店" style Rednote. OUTPUT FORMAT: one TITLE line prefixed by "TITLE:" (include 1-2 emojis), one blank line, then BODY. Tone: personal, story-like, recommendation-focused. BODY requirements: 5–8 short sentences (approx 140–260 chars), include sensory details, one short anecdote, a recommended dish, and an approximate per-person price. Use emojis liberally (8–12 total; title 1-2, body 6–10). Include at least one location hashtag (#JHU or #Baltimore). VARY persona and wording each generation — do not repeat. Optionally mention the shop opened ~1 month ago when relevant. Do NOT invent dishes beyond visible items. End with a one-line photo suggestion. ${exampleEn}`
+          const promptXhsEn = `${platformTemplates.xiaohongshu.en} ${locationHint} IMPORTANT: This must be a "探店" style Rednote with TITLE + BODY.
+OUTPUT FORMAT: one TITLE line prefixed by "TITLE:" (include 1-2 emojis). TITLE MUST NOT CONTAIN any hashtags.
+One blank line, then BODY. BODY must end with a block of 2–4 hashtags (append as a single group at the end), chosen from this pool when relevant: #JHU #Baltimore #Foodie #探店 #小碗菜 #宝藏小店 #周末去哪儿 #打卡.
+Tone: personal, story-like, recommendation-focused. BODY requirements: 5–8 short sentences (approx 140–260 chars), include sensory details, one short anecdote (ordering or photo moment), recommend 1 must-order dish, and include an approximate per-person price. Use emojis liberally (title 1-2, body 6–10; total 8–12).
+Variation: choose a different narrative style each generation (anecdote, sensory, list-style tips, quick-recommendation) and vary persona/voice; avoid repeating phrasing.
+Do NOT invent dishes beyond visible items. Optionally mention "opened ~1 month" when natural. End with a one-line photo suggestion. ${exampleEn}`
 
-          const promptXhsZh = `${platformTemplates.xiaohongshu.zh} ${locationHint} 要求：必须为探店风格，输出格式：单行标题前缀 "标题:"（标题含1-2个 emoji），空一行，然后正文。语气亲切、讲故事式，正文要求：5–8 个短句（约 140–260 字），包含感官描写、一个简短小故事/拍照或点单瞬间、推荐必点菜与估算人均价。正文请使用 8–12 个 emoji（标题 1–2，正文 6–10），并至少包含一个地点标签（#JHU 或 #Baltimore）。每次生成请变换角色与措辞，避免模板化重复。可在合适情况下提到「店刚开约1个月」。不要杜撰图片中没有的菜品。结尾请给出一句照片构图建议。${exampleZh}`
+          const promptXhsZh = `${platformTemplates.xiaohongshu.zh} ${locationHint} 要求：必须为探店风格，输出格式：单行标题前缀 "标题:"（标题含1-2个 emoji），空一行，然后正文。标题中请不要包含任何标签或话题。
+正文结尾必须追加一组 2–4 个话题标签（作为一个块追加在最后），可从如下池子中选择：#JHU #Baltimore #Foodie #探店 #小碗菜 #宝藏小店 #周末去哪儿 #打卡。
+语气：亲切、讲故事式，正文要求：5–8 个短句（约 140–260 字），包含感官描写、一个简短小故事（点单或拍照瞬间）、推荐必点菜，并估算人均价。正文中请大量使用 emoji（标题 1–2，正文 6–10；总计 8–12）。
+多样性：每次生成时请随机选择不同的叙事风格（小故事、感官描写、清单式建议、快速推荐）并变换角色/语气，避免重复措辞。
+不要杜撰图片中没有的菜品。可在合适情况下提到「店刚开约1个月」。结尾请给出一句照片构图建议。${exampleZh}`
 
           userMsg = isZh ? promptXhsZh : promptXhsEn
         } else {
@@ -605,16 +614,45 @@ BODY: 家人们！今天挖到宝了～這家店的麻将盒子太好拍照了�
         await new Promise(res => setTimeout(res, 120))
         try {
           const txt = aiResult || ''
-          const titleMatchEn = txt.match(/TITLE:\\s*(.+?)\\s*\\n\\s*BODY:\\s*([\\s\\S]+)/i)
-          const titleMatchZh = txt.match(/标题[:：]\\s*(.+?)\\s*\\n\\s*正文[:：]?\\s*([\\s\\S]+)/i)
+          const titleMatchEn = txt.match(/TITLE:\s*(.+?)\s*\n\s*BODY:\s*([\s\S]+)/i)
+          const titleMatchZh = txt.match(/标题[:：]\s*(.+?)\s*\n\s*正文[:：]?\s*([\s\S]+)/i)
+          let title = null
+          let body = txt
           if (titleMatchEn) {
-            setAiTitle(titleMatchEn[1].trim())
-            setAiResult(titleMatchEn[2].trim())
+            title = titleMatchEn[1].trim()
+            body = titleMatchEn[2].trim()
           } else if (titleMatchZh) {
-            setAiTitle(titleMatchZh[1].trim())
-            setAiResult(titleMatchZh[2].trim())
+            title = titleMatchZh[1].trim()
+            body = titleMatchZh[2].trim()
           }
-        } catch(e){}
+
+          const extractAndNormalize = (rawTitle, rawBody) => {
+            const hashtagRe = /#([^\s#，。,。!！?？]+)/g
+            const found = new Set()
+            const collect = (s) => {
+              if (!s) return
+              let m
+              while ((m = hashtagRe.exec(s))) {
+                found.add('#' + m[1])
+              }
+            }
+            collect(rawTitle)
+            collect(rawBody)
+            const stripHashtags = (s) => (s || '').replace(hashtagRe, '').replace(/\s{2,}/g, ' ').trim()
+            const cleanTitle = stripHashtags(rawTitle || '')
+            const cleanBody = stripHashtags(rawBody || '')
+            const tagsArr = Array.from(found)
+            const tagsToAppend = tagsArr.slice(0, 4).join(' ')
+            const finalBody = tagsToAppend ? `${cleanBody} ${tagsToAppend}`.trim() : cleanBody
+            return { title: cleanTitle, body: finalBody }
+          }
+
+          if (title || body) {
+            const normalized = extractAndNormalize(title, body)
+            if (normalized.title) setAiTitle(normalized.title)
+            setAiResult(normalized.body)
+          }
+        } catch (e) {}
         message.success(t('ai_generated'))
       } else {
         // fallback to full json
@@ -632,14 +670,37 @@ BODY: 家人们！今天挖到宝了～這家店的麻将盒子太好拍照了�
         }
         // parse title/body if present
         try {
-          const titleMatchEn = text.match(/TITLE:\\s*(.+?)\\s*\\n\\s*BODY:\\s*([\\s\\S]+)/i)
-          const titleMatchZh = text.match(/标题[:：]\\s*(.+?)\\s*\\n\\s*正文[:：]?\\s*([\\s\\S]+)/i)
-          if (titleMatchEn) {
-            setAiTitle(titleMatchEn[1].trim())
-            setAiResult(titleMatchEn[2].trim())
-          } else if (titleMatchZh) {
-            setAiTitle(titleMatchZh[1].trim())
-            setAiResult(titleMatchZh[2].trim())
+          const titleMatchEn = text.match(/TITLE:\s*(.+?)\s*\n\s*BODY:\s*([\s\S]+)/i)
+          const titleMatchZh = text.match(/标题[:：]\s*(.+?)\s*\n\s*正文[:：]?\s*([\s\S]+)/i)
+          if (titleMatchEn || titleMatchZh) {
+            let title = null
+            let body = text
+            if (titleMatchEn) {
+              title = titleMatchEn[1].trim()
+              body = titleMatchEn[2].trim()
+            } else if (titleMatchZh) {
+              title = titleMatchZh[1].trim()
+              body = titleMatchZh[2].trim()
+            }
+            const normalize = (rawTitle, rawBody) => {
+              const hashtagRe = /#([^\s#，。,。!！?？]+)/g
+              const found = new Set()
+              let m
+              const collect = (s) => {
+                if (!s) return
+                while ((m = hashtagRe.exec(s))) found.add('#' + m[1])
+              }
+              collect(rawTitle); collect(rawBody)
+              const strip = (s) => (s || '').replace(hashtagRe, '').replace(/\s{2,}/g, ' ').trim()
+              const cleanTitle = strip(rawTitle || '')
+              const cleanBody = strip(rawBody || '')
+              const tags = Array.from(found).slice(0,4).join(' ')
+              const finalBody = tags ? `${cleanBody} ${tags}`.trim() : cleanBody
+              return { title: cleanTitle, body: finalBody }
+            }
+            const normalized = normalize(title, body)
+            if (normalized.title) setAiTitle(normalized.title)
+            setAiResult(normalized.body)
           } else {
             setAiResult(text)
           }
