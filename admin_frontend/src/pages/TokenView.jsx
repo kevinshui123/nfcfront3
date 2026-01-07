@@ -484,11 +484,11 @@ export default function TokenView() {
 
           // If Xiaohongshu, append an explicit instruction + example to force TITLE/BODY and emojis
           if (platformId === 'xiaohongshu') {
-            const xhsInsEn = `IMPORTANT: OUTPUT MUST be exactly: one TITLE line prefixed with "TITLE:" (include 1-2 emojis), one blank line, then BODY. Use casual voice (e.g., "家人们"), include emojis (3-6 in body), sensory words, and one short hashtag. Do NOT invent dishes beyond visible items. Example:
+            const xhsInsEn = `IMPORTANT: OUTPUT MUST be exactly: one TITLE line prefixed with "TITLE:" (include 1-2 emojis), one blank line, then BODY. Use casual voice (e.g., "家人们"), include emojis (4-8 in body), sensory words, and one short hashtag. BODY should be medium-long: 3-5 short sentences (~70-140 chars). Include at least one location hashtag among #JHU #Baltimore. VARY persona and wording each generation; do not repeat the same phrasing. Optionally mention the shop opened ~1 month ago when relevant. Do NOT invent dishes beyond visible items. Example:
 TITLE: I declare 📣 this is the "雀神" of small-bowl dishes! 🀄️💥
 
-BODY: 家人们！今天挖到宝了～這家店的麻将盒子太好拍照了📸，味道也在线。#小碗菜探店`
-            const xhsInsZh = `要求：输出格式必须为：单行标题前缀 "标题:"（标题含1-2个emoji），空一行，然后正文。使用口语化语气（如“家人们”），正文中使用3-6个emoji，加入感官词和短标签。不要杜撰图片中没有的菜品。示例：
+BODY: 家人们！今天挖到宝了～這家店的麻将盒子太好拍照了📸，味道也在线，鸿运当头红烧肉超下饭😍。#小碗菜探店`
+            const xhsInsZh = `要求：输出格式必须为：单行标题前缀 "标题:"（标题含1-2个emoji），空一行，然后正文。使用口语化语气（如“家人们”），正文中使用4-8个emoji，正文长度为3-5个短句（约70-140字符）。正文中请包含至少一个地点标签，例如 #JHU 或 #Baltimore（如自然可同时包含）。每次生成请变换角色和措辞，避免重复。可在合适情况下提到「店刚开一个月」，但不要每次都写出。不要杜撰图片中没有的菜品。示例：
 标题: 我宣布📣这就是小碗菜界的“雀神”🀄️！
 
 正文: 家人们～今天挖到宝了！麻将饭盒超出片📸，红烧肉又香又软。#宝藏小店`
@@ -516,9 +516,9 @@ BODY: 家人们！今天挖到宝了～這家店的麻将盒子太好拍照了�
 
 正文: 家人们～今天挖到宝了！麻将饭盒超出片📸，红烧肉又香又软，性价比超高💰。#宝藏小店`
 
-          const promptXhsEn = `${platformTemplates.xiaohongshu.en} ${locationHint} IMPORTANT: OUTPUT FORMAT MUST be exactly: a single TITLE line prefixed by "TITLE:" (include at least 1-2 emojis in the title), one blank line, then BODY. Use casual, friendly voice (e.g. start with "家人们" or "大家好"), include emojis liberally (at least 2 in title, 3-6 in body), sensory words, a short hashtag. Do NOT invent dishes beyond what is visible in the photos. Keep factual. ${exampleEn}`
+          const promptXhsEn = `${platformTemplates.xiaohongshu.en} ${locationHint} IMPORTANT: OUTPUT FORMAT MUST be exactly: a single TITLE line prefixed by "TITLE:" (include at least 1-2 emojis in the title), one blank line, then BODY. Use casual, friendly voice (e.g. start with "家人们" or "大家好"), include emojis liberally (at least 2 in title, 4-8 in body), sensory words, and one short hashtag. BODY should be medium-long: 3–5 short sentences (roughly 70–140 characters). Include at least one location hashtag among #JHU #Baltimore (or both if natural). VARY the persona and wording each generation — do not repeat the same phrasing. Optionally (sometimes) mention the shop is newly opened (~1 month) when relevant. Do NOT invent dishes beyond what is visible in the photos. Keep factual and natural. ${exampleEn}`
 
-          const promptXhsZh = `${platformTemplates.xiaohongshu.zh} ${locationHint} 要求：输出格式必须是：单行标题，前缀为 "标题:"（标题中至少包含1-2个 emoji），空一行，接着正文。使用口语化、亲切的语气（例如“家人们”），正文中请适量使用 emoji（3-6 个），加入感官词和短标签。不要杜撰图片中没有的菜品。${exampleZh}`
+          const promptXhsZh = `${platformTemplates.xiaohongshu.zh} ${locationHint} 要求：输出格式必须是：单行标题，前缀为 "标题:"（标题中至少包含1-2个 emoji），空一行，接着正文。使用口语化、亲切的语气（例如“家人们”），正文中请适量使用 emoji（4-8 个），正文长度为中偏长：3–5 个短句（约 70–140 个字符）。正文中请包含至少一个地点标签，例如 #JHU 或 #Baltimore（如自然可同时包含）。每次生成时请变换角色和措辞，避免重复。可在合适情况下提到「店刚开一个月」等信息，但不要每次都写出。不要杜撰图片中没有的菜品。${exampleZh}`
 
           userMsg = isZh ? promptXhsZh : promptXhsEn
         } else {
