@@ -1015,7 +1015,7 @@ Do not restrict length — let the model decide. Each generation MUST be differe
                           // after copying navigate to publish for first selected platform
                           const first = selected[0] || (platforms[0] && platforms[0].id)
                           if (first) {
-                            setTimeout(() => navigate(`/t/${token}/publish/${first}`), 350)
+                            setTimeout(() => navigate(`/t/${token}/publish/${first}`, { state: { title: aiTitle, body: aiResult, photo: photoUrl, photos } }), 350)
                           }
                         } catch (e) {
                           message.error(t('copy_failed'))
@@ -1053,7 +1053,7 @@ Do not restrict length — let the model decide. Each generation MUST be differe
                     <Button className="ui-btn ui-btn-primary full-cta" onClick={() => {
                       const first = selected[0] || (platforms[0] && platforms[0].id)
                       if (!first) { message.info(t('no_platform_selected')); return }
-                      navigate(`/t/${token}/publish/${first}`)
+                      navigate(`/t/${token}/publish/${first}`, { state: { title: aiTitle, body: aiResult, photo: photoUrl, photos } })
                     }} style={{ minWidth: 220 }}>{t('next_open_platform')}</Button>
                   </div>
                 </div>
