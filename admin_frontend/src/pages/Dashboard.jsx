@@ -104,8 +104,8 @@ export default function Dashboard() {
 
       <div className="app-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div className="header-actions" style={{ display: 'flex', alignItems: 'center', height: 36 }}>
-            <div className="muted" style={{ marginRight: 12, lineHeight: '36px' }}>{(currentUser && currentUser.email) || '...'}</div>
+          <div className="header-actions" style={{ display: 'flex', alignItems: 'center', height: 40 }}>
+            <div className="muted" style={{ marginRight: 12, lineHeight: '40px' }}>{(currentUser && currentUser.email) || '...'}</div>
             <Space>
               {currentUser && currentUser.is_admin ? (
                 <Button
@@ -113,14 +113,14 @@ export default function Dashboard() {
                   icon={<UserAddOutlined />}
                   loading={creatingMerchant}
                   onClick={handleCreateMerchant}
-                  style={{ height: 36, padding: '0 12px', display: 'flex', alignItems: 'center' }}
+                  style={{ height: 40, lineHeight: '40px', padding: '0 14px', display: 'flex', alignItems: 'center' }}
                 >
                   创建商户账号
                 </Button>
               ) : null}
               <Button
                 onClick={() => { localStorage.removeItem('access_token'); window.location.href = '/' }}
-                style={{ height: 36, padding: '0 12px', display: 'flex', alignItems: 'center' }}
+                style={{ height: 40, lineHeight: '40px', padding: '0 14px', display: 'flex', alignItems: 'center' }}
               >
                 登出
               </Button>

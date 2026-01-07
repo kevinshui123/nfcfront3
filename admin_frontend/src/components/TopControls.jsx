@@ -26,13 +26,13 @@ export default function TopControls() {
   }, [theme])
 
   return (
-    <div className="top-controls" aria-hidden="false" style={{ display: 'flex', alignItems: 'center', marginTop: -1 }}>
+    <div className="top-controls" aria-hidden="false" style={{ display: 'flex', alignItems: 'center', marginTop: 0, height: 40 }}>
       {/* Theme toggle removed; app uses dark theme only */}
       <Tooltip title={lang === 'en' ? 'Switch to 中文' : '切换到 English'}>
         <Button
           shape="round"
           onClick={() => setLang(prev => prev === 'en' ? 'zh' : 'en')}
-          style={{ marginLeft: 0, height: 36, padding: '0 12px', display: 'flex', alignItems: 'center', transform: 'translateY(-2px)' }}
+          style={{ marginLeft: 0, height: 40, lineHeight: '40px', padding: '0 14px', display: 'flex', alignItems: 'center' }}
           aria-label="lang-toggle"
         >
           <GlobalOutlined /> {lang === 'en' ? 'EN' : '中文'}
