@@ -441,10 +441,11 @@ export default function TokenView() {
         const briefZH = 'Mahjong 为小碗菜餐馆。门口右侧为奶茶柜台，前方是打饭台，顾客按点单由前台打成小碗上菜。仅陈述事实，不要杜撰菜品。'
 
         const isZh = (language && (String(language).toLowerCase().includes('zh') || language === 'Chinese'))
-        const langDirective = isZh ? '请用中文回复。' : 'Respond in English.'
+        // Force Google reviews to be in English regardless of selected UI language
+        const langDirective = platformId === 'google' ? 'Respond in English.' : (isZh ? '请用中文回复。' : 'Respond in English.')
 
         const platformPreamble = platformId === 'google'
-          ? (isZh ? '写一条非常简短、客观的 Google 地图点评；1-2 个短句，不要夸张或营销。' : 'Write a very short factual Google Maps review; 1-2 short sentences. No exaggeration or marketing.')
+          ? 'Write a very short factual Google Maps review; 1-2 short sentences. No exaggeration or marketing.'
           : (isZh ? '你是文案写手，生成自然、真实且不过度夸张的用户评价。不要披露 AI 身份；不要杜撰菜品。' : 'You are a copywriter producing natural, realistic user reviews. Do not reveal you are AI; do not invent dishes that are not present.')
 
         const system = {
