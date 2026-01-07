@@ -411,72 +411,68 @@ export default function TokenView() {
         return
       }
 
+      // concise per-platform templates; language enforcement and truthfulness handled in system message
       const platformTemplates = {
         xiaohongshu: {
-          en: 'Write a natural, human-sounding review for Rednote. Keep it varied and realistic; length: {length}; persona: {persona}.',
-          zh: '为小红书写一条自然、真实的用户评价。长度：{length}；角色：{persona}。'
+          en: 'Write a natural, real-feeling Rednote review. Tone: friendly; length: medium; persona: {persona}. Use visible items only.',
+          zh: '为小红书写一条自然、真实的评价。语气友好；长度：中等；角色：{persona}。如有图片，仅使用图片中可见的菜名信息。'
         },
         douyin: {
-          en: 'Write a casual, punchy Douyin caption-style review. Keep it varied and realistic; length: {length}; persona: {persona}.',
-          zh: '为抖音写一条简洁、有趣的评价/文案。长度：{length}；角色：{persona}。'
+          en: 'Short punchy Douyin caption, concise, natural. Max ~40 words. Use visible items only.',
+          zh: '简短有力的抖音文案，精炼自然。不超过约40字。仅使用可见菜品信息。'
         },
         facebook: {
-          en: 'Write a friendly Facebook-style review with detail and authentic voice. Length: {length}; persona: {persona}.',
-          zh: '为 Facebook 写一条友好、详细的评价。长度：{length}；角色：{persona}。'
+          en: 'Short friendly Facebook review. Concise, factual, avoid exaggeration. Use visible items only.',
+          zh: '简短友好的 Facebook 点评。简洁、事实为主，避免夸张。仅使用可见菜品信息。'
         },
         instagram: {
-          en: 'Write an Instagram caption-style review with emoji-friendly tone. Length: {length}; persona: {persona}.',
-          zh: '为 Instagram 写一条适合发布的文案，适量 emoji。长度：{length}；角色：{persona}。'
+          en: 'Short Instagram caption with light emoji. Keep concise and truthful. Use visible items only.',
+          zh: '简短的 Instagram 文案，适量 emoji，真实简洁。仅使用可见菜品信息。'
+        },
+        google: {
+          en: 'Very short factual Google Maps review. 1–2 short sentences. No marketing or exaggeration. Use visible items only.',
+          zh: '非常简短、客观的 Google 地图点评。1-2 个短句，真实、不夸张。仅使用可见菜品信息。'
         }
       }
 
       const buildMessages = (platformId, language, userPrompt, photo) => {
-        // system instruction: concise for Google, fuller for socials
-        const restaurantBriefEN = language === 'Chinese'
-          ? 'Mahjong：小碗菜，价格亲民，服务好，食材新鲜，口味浓，出餐快。'
-          : 'Mahjong: small-bowl restaurant. Low price, good service, fresh ingredients, bold flavors, fast.'
+        // restaurant brief and layout info for context
+        const briefEN = 'Mahjong is a small-bowl restaurant. Near the entrance on the right is a milk-tea counter; further ahead is the food serving counter where staff serve small bowls. Only state facts; do not invent dishes.'
+        const briefZH = 'Mahjong 为小碗菜餐馆。门口右侧为奶茶柜台，前方是打饭台，顾客按点单由前台打成小碗上菜。仅陈述事实，不要杜撰菜品。'
+
+        const isZh = (language && (String(language).toLowerCase().includes('zh') || language === 'Chinese'))
+        const langDirective = isZh ? '请用中文回复。' : 'Respond in English.'
+
+        const platformPreamble = platformId === 'google'
+          ? (isZh ? '写一条非常简短、客观的 Google 地图点评；1-2 个短句，不要夸张或营销。' : 'Write a very short factual Google Maps review; 1-2 short sentences. No exaggeration or marketing.')
+          : (isZh ? '你是文案写手，生成自然、真实且不过度夸张的用户评价。不要披露 AI 身份；不要杜撰菜品。' : 'You are a copywriter producing natural, realistic user reviews. Do not reveal you are AI; do not invent dishes that are not present.')
+
         const system = {
           role: 'system',
-          content: platformId === 'google'
-            ? ((language === 'Chinese') ? '作为真实用户，写一条简短、客观的 Google 地图点评。不夸张。' : 'As a real user, write a short, objective Google Maps review. No exaggeration.')
-            : ((language === 'Chinese') ? '你是写文案的创作者，生成自然、真实的用户评价。不要透露自己是 AI。' : 'You are a creative copywriter. Produce natural, realistic user reviews. Do NOT reveal you are AI.')
+          content: `${platformPreamble} ${langDirective} ${isZh ? briefZH : briefEN}`
         }
 
-        // create varied user prompt: include platform hint and randomness
-        const personas = [
-          'A satisfied customer who bought the item last week',
-          'A casual user who loves fashion and convenience',
-          'A student sharing quick thoughts',
-          'A power user who cares about details',
-          'A foodie writing a short caption'
-        ]
-        const lengths = ['short', 'medium', 'long']
+        // small set of personas for variation
+        const personas = isZh ? ['一位满意的顾客', '学生', '上班族', '美食爱好者'] : ['a satisfied customer', 'a student', 'a working professional', 'a foodie']
         const persona = personas[Math.floor(Math.random() * personas.length)]
-        const length = lengths[Math.floor(Math.random() * lengths.length)]
 
-        let userContent
-        // Use platform-specific template if available
         const platformKey = platformId || 'instagram'
-        const tmpl = (platformTemplates[platformKey] && platformTemplates[platformKey][language.toLowerCase() === 'chinese' ? 'zh' : 'en']) || `Write a review for ${platformKey}. Length: {length}; Persona: {persona}.`
-        const filled = tmpl.replace('{length}', length).replace('{persona}', persona)
+        const tmpl = (platformTemplates[platformKey] && platformTemplates[platformKey][isZh ? 'zh' : 'en']) || (isZh ? '写一条简短评价。' : 'Write a short review.')
+        const userText = (userPrompt && String(userPrompt).trim()) || tmpl.replace('{persona}', persona)
 
-        // accept array of photos; use first to keep payload small
+        // attach only first photo to reduce payload; instruct model to use visible info only
         const photoToUse = Array.isArray(photo) ? photo[0] : photo
         if (photoToUse) {
-          userContent = [
-            { type: 'text', text: `${userPrompt || filled}` },
+          const contentArray = [
+            { type: 'text', text: `${userText}` },
             { type: 'image_url', image_url: { url: photoToUse } },
-            { type: 'text', text: `Persona: ${persona}. Generate a ${length} review in ${language}. Keep concise.` }
+            { type: 'text', text: isZh ? `角色：${persona}。请仅使用图片和上述信息中可见的菜名与事实，保持简洁，避免夸张。` : `Persona: ${persona}. Use only visible dishes and facts from the image or brief. Keep concise and avoid exaggeration.` }
           ]
-        } else {
-          userContent = `${userPrompt || filled} Persona: ${persona}. Generate a ${length} review in ${language}.`
+          return [system, { role: 'user', content: contentArray }]
         }
 
-        // messages array: system + user
-        if (Array.isArray(userContent)) {
-          return [system, { role: 'user', content: userContent }]
-        }
-        return [system, { role: 'user', content: userContent }]
+        const userMsg = isZh ? `${userText} 角色：${persona}。请保持简洁、真实，不要杜撰菜品。` : `${userText} Persona: ${persona}. Keep it concise, truthful, and do not invent dishes.`
+        return [system, { role: 'user', content: userMsg }]
       }
 
       const platformId = (selected && selected[0]) || (platforms[0] && platforms[0].id) || 'instagram'
