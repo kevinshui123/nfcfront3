@@ -32,7 +32,7 @@ export default function TopControls() {
         <Button
           shape="round"
           onClick={() => setLang(prev => prev === 'en' ? 'zh' : 'en')}
-          style={{ marginLeft: 0, height: 36, padding: '0 12px', display: 'flex', alignItems: 'center' }}
+          style={{ marginLeft: 0, height: 36, padding: '0 12px', display: 'flex', alignItems: 'center', transform: 'translateY(-2px)' }}
           aria-label="lang-toggle"
         >
           <GlobalOutlined /> {lang === 'en' ? 'EN' : '中文'}
