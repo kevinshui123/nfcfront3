@@ -17,6 +17,8 @@ import NeuralBackground from './components/NeuralBackground'
 // set document title and favicon
 try {
   document.title = 'SONGZIKE TOOL'
+  // Backwards-compatible global token for older bundles that reference `token`
+  try { var token = localStorage.getItem('access_token') } catch(e) { var token = null }
   const link = document.querySelector("link[rel~='icon']") || document.createElement('link')
   link.rel = 'icon'
   link.href = '/assets/logo.png'
