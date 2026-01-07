@@ -77,10 +77,21 @@ export default function PublishPage() {
             <div style={{ marginBottom: 8 }}>
               <Space direction="vertical" style={{ width: '100%' }}>
                 <div style={{ background: 'rgba(0,0,0,0.24)', padding: 10, borderRadius: 6 }}>
-                  <div style={{ fontWeight: 700, marginBottom: 6 }}>{title || '（无标题）'}</div>
+                  {/*
+                    Display title (use fallback extracted from body if title missing).
+                    Ensure title color is visible on dark background.
+                  */}
+                  <div style={{ fontWeight: 700, marginBottom: 6, color: 'var(--text)' }}>
+                    {title || (() => {
+                      const b = body || ''
+                      // take first line or first 40 chars as fallback
+                      const firstLine = (b.split(/\r?\n/)[0] || '').trim()
+                      if (firstLine) return firstLine.length > 40 ? firstLine.slice(0, 40) + '…' : firstLine
+                      return '（无标题）'
+                    })()}
+                  </div>
                   <div style={{ whiteSpace: 'pre-wrap', color: 'var(--muted)' }}>{body || '（正文为空）'}</div>
                 </div>
-                {photo ? <Image src={photo} alt="photo" style={{ maxHeight: 160, objectFit: 'cover' }} /> : null}
                 <div style={{ display: 'flex', gap: 8 }}>
                   <Button onClick={async () => {
                     try {
@@ -90,10 +101,10 @@ export default function PublishPage() {
                   }}>复制标题</Button>
                   <Button onClick={async () => {
                     try {
-                      await navigator.clipboard.writeText((title ? title + '\n\n' : '') + (body || ''))
-                      message.success('标题与正文已复制')
+                      await navigator.clipboard.writeText(body || '')
+                      message.success('正文已复制')
                     } catch (e) { message.error('复制失败') }
-                  }}>复制标题+正文</Button>
+                  }}>复制正文</Button>
                 </div>
               </Space>
             </div>
