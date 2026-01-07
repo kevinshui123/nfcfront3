@@ -58,18 +58,14 @@ export default function MerchantDashboard() {
   return (
     <div style={{ padding: 24 }}>
       <div className="app-header">
-        <div className="brand">
-          <div className="brand-logo"><div className="brand-initials">SZ</div></div>
-          <div>
-            <div className="brand-title">{shop.name}</div>
+        <div style={{ position: 'relative', padding: '8px 0' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <div className="header-actions">
+              <div className="muted" style={{ marginRight: 12 }}>merchant@{shop.name}</div>
+              <Button onClick={() => { localStorage.removeItem('access_token'); window.location.href = '/' }}>登出</Button>
+            </div>
           </div>
-        </div>
-        <div style={{ position: 'relative' }}>
-          <div className="header-actions">
-            <div className="muted">merchant@{shop.name}</div>
-            <Button onClick={() => { localStorage.removeItem('access_token'); window.location.href = '/' }}>登出</Button>
-          </div>
-          <div style={{ position: 'absolute', right: 0, top: -6 }}>
+          <div style={{ position: 'absolute', right: 0, top: 6 }}>
             <TopControls />
           </div>
         </div>

@@ -103,27 +103,26 @@ export default function Dashboard() {
       </Modal>
 
       <div className="app-header">
-        <div className="brand">
-          <div className="brand-logo"><div className="brand-initials">SZ</div></div>
-        </div>
-        <div style={{ position: 'relative' }}>
-          <div className="header-actions">
-            <div className="muted">{(currentUser && currentUser.email) || '...'}</div>
-            <Space>
-              {currentUser && currentUser.is_admin ? (
-                <Button
-                  type="primary"
-                  icon={<UserAddOutlined />}
-                  loading={creatingMerchant}
-                  onClick={handleCreateMerchant}
-                >
-                  创建商户账号
-                </Button>
-              ) : null}
-              <Button onClick={() => { localStorage.removeItem('access_token'); window.location.href = '/' }}>登出</Button>
-            </Space>
+        <div style={{ position: 'relative', padding: '8px 0' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <div className="header-actions">
+              <div className="muted" style={{ marginRight: 12 }}>{(currentUser && currentUser.email) || '...'}</div>
+              <Space>
+                {currentUser && currentUser.is_admin ? (
+                  <Button
+                    type="primary"
+                    icon={<UserAddOutlined />}
+                    loading={creatingMerchant}
+                    onClick={handleCreateMerchant}
+                  >
+                    创建商户账号
+                  </Button>
+                ) : null}
+                <Button onClick={() => { localStorage.removeItem('access_token'); window.location.href = '/' }}>登出</Button>
+              </Space>
+            </div>
           </div>
-          <div style={{ position: 'absolute', right: 0, top: -6 }}>
+          <div style={{ position: 'absolute', right: 0, top: 6 }}>
             <TopControls />
           </div>
         </div>
