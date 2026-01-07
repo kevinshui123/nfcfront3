@@ -113,11 +113,17 @@ export default function Dashboard() {
                   icon={<UserAddOutlined />}
                   loading={creatingMerchant}
                   onClick={handleCreateMerchant}
+                  style={{ height: 36, padding: '0 12px', display: 'flex', alignItems: 'center' }}
                 >
                   创建商户账号
                 </Button>
               ) : null}
-              <Button onClick={() => { localStorage.removeItem('access_token'); window.location.href = '/' }}>登出</Button>
+              <Button
+                onClick={() => { localStorage.removeItem('access_token'); window.location.href = '/' }}
+                style={{ height: 36, padding: '0 12px', display: 'flex', alignItems: 'center' }}
+              >
+                登出
+              </Button>
             </Space>
           </div>
         </div>
