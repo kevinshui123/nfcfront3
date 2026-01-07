@@ -45,6 +45,11 @@ const translations = {
     ,platform_douyin: '抖音'
     ,platform_facebook: 'Facebook'
     ,platform_instagram: 'Instagram'
+    ,platform_google: 'Google 地图'
+    ,photos_needed_label: '已拍照片'
+    ,photos_needed_notify: '还需拍摄更多照片'
+    ,click_generate_review: '点击生成评价'
+    ,map_title: '位置'
   },
   en: {
     brandTitle: 'Songzike Tool',
@@ -95,6 +100,11 @@ const translations = {
     ,platform_douyin: 'Douyin'
     ,platform_facebook: 'Facebook'
     ,platform_instagram: 'Instagram'
+    ,platform_google: 'Google Maps'
+    ,photos_needed_label: 'Photos taken'
+    ,photos_needed_notify: 'Please take more photos'
+    ,click_generate_review: 'Click to generate review'
+    ,map_title: 'Location'
   }
 }
 

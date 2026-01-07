@@ -36,6 +36,7 @@ export default function TokenView() {
   const [prompt, setPrompt] = useState('')
   const [aiResult, setAiResult] = useState(null)
   const [photoUrl, setPhotoUrl] = useState(null)
+  const [photos, setPhotos] = useState([]) // accumulate up to 3 photos
   const [aiLoading, setAiLoading] = useState(false)
   const [aiProgress, setAiProgress] = useState(0)
   const [pubLoading, setPubLoading] = useState(false)
@@ -324,6 +325,17 @@ export default function TokenView() {
 
   const platforms = [
     {
+      id: 'google',
+      label: t('platform_google') || 'Google',
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+          <circle cx="12" cy="12" r="10" fill="#4285F4"></circle>
+        </svg>
+      ),
+      deepLink: 'https://maps.google.com',
+      webFallback: 'https://maps.google.com'
+    },
+    {
       id: 'xiaohongshu',
       label: t('platform_xiaohongshu'),
       icon: (
@@ -419,13 +431,15 @@ export default function TokenView() {
       }
 
       const buildMessages = (platformId, language, userPrompt, photo) => {
-        // system instruction: don't sound like AI, vary length and persona
-        const restaurantBriefEN = `This is Mahjong, a small-bowl (xiaowan) restaurant offering many dishes. Highlight that it's low-priced, good service, fresh ingredients, bold flavors, and quick convenient meals. The uploaded photo is only a reference.`
-        const restaurantBriefZH = `这是 Mahjong，小碗菜餐馆，特点：价格亲民、服务态度好、食材新鲜、口味浓郁、上菜快。上传的照片仅供参考。`
-        const restaurantBrief = (language === 'Chinese') ? restaurantBriefZH : restaurantBriefEN
+        // system instruction: concise for Google, fuller for socials
+        const restaurantBriefEN = language === 'Chinese'
+          ? 'Mahjong：小碗菜，价格亲民，服务好，食材新鲜，口味浓，出餐快。'
+          : 'Mahjong: small-bowl restaurant. Low price, good service, fresh ingredients, bold flavors, fast.'
         const system = {
           role: 'system',
-          content: `You are a creative social media copywriter. Produce diverse, realistic user reviews for ${platformId}. Vary length (short/medium/long), tone, and persona. Do NOT reveal you are AI. Prefer natural, human phrasing. Language: ${language}. ${restaurantBrief}`
+          content: platformId === 'google'
+            ? ((language === 'Chinese') ? '作为真实用户，写一条简短、客观的 Google 地图点评。不夸张。' : 'As a real user, write a short, objective Google Maps review. No exaggeration.')
+            : ((language === 'Chinese') ? '你是写文案的创作者，生成自然、真实的用户评价。不要透露自己是 AI。' : 'You are a creative copywriter. Produce natural, realistic user reviews. Do NOT reveal you are AI.')
         }
 
         // create varied user prompt: include platform hint and randomness
@@ -446,11 +460,13 @@ export default function TokenView() {
         const tmpl = (platformTemplates[platformKey] && platformTemplates[platformKey][language.toLowerCase() === 'chinese' ? 'zh' : 'en']) || `Write a review for ${platformKey}. Length: {length}; Persona: {persona}.`
         const filled = tmpl.replace('{length}', length).replace('{persona}', persona)
 
-        if (photo) {
+        // accept array of photos; use first to keep payload small
+        const photoToUse = Array.isArray(photo) ? photo[0] : photo
+        if (photoToUse) {
           userContent = [
             { type: 'text', text: `${userPrompt || filled}` },
-            { type: 'image_url', image_url: { url: photo } },
-            { type: 'text', text: `Persona: ${persona}. Generate a ${length} review in ${language}. Include natural variations and avoid generic AI-sounding phrasing.` }
+            { type: 'image_url', image_url: { url: photoToUse } },
+            { type: 'text', text: `Persona: ${persona}. Generate a ${length} review in ${language}. Keep concise.` }
           ]
         } else {
           userContent = `${userPrompt || filled} Persona: ${persona}. Generate a ${length} review in ${language}.`
@@ -465,7 +481,7 @@ export default function TokenView() {
 
       const platformId = (selected && selected[0]) || (platforms[0] && platforms[0].id) || 'instagram'
       const language = (localStorage.getItem('sz_lang') || 'en') === 'zh' ? 'Chinese' : 'English'
-      const messages = buildMessages(platformId, language, prompt || (content && content.title) || t('ai_prompt_default'), photoUrl)
+      const messages = buildMessages(platformId, language, prompt || (content && content.title) || t('ai_prompt_default'), (photos && photos.length) ? photos : photoUrl)
 
       const body = {
         model: 'qwen3-vl-plus',
@@ -644,6 +660,24 @@ export default function TokenView() {
                 {content?.body && !String(content?.body).toLowerCase().includes('demo') && !String(content?.body).includes('模拟') && (
                   <p style={{ color: 'var(--muted)', margin: '0 auto 8px', maxWidth: 520 }}>{content?.body}</p>
                 )}
+                {/* Google Map iframe (simple embed using shop name) */}
+                {content && content.shop && content.shop.name && (
+                  <div style={{ marginTop: 10, display: 'flex', justifyContent: 'center' }}>
+                    <div style={{ width: '100%', maxWidth: 520, borderRadius: 8, overflow: 'hidden', boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.02)' }}>
+                      <div style={{ padding: '8px 12px', background: 'rgba(0,0,0,0.25)', color: 'var(--muted)' }}>
+                        {t('map_title') || 'Location'}
+                      </div>
+                      <iframe
+                        title="shop-map"
+                        src={`https://www.google.com/maps?q=${encodeURIComponent(content.shop.name + ' Mahjong')}&output=embed`}
+                        width="100%"
+                        height="220"
+                        style={{ border: 0, display: 'block' }}
+                        loading="lazy"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Step 0: Take Photo */}
@@ -663,10 +697,18 @@ export default function TokenView() {
                         const reader = new FileReader()
                         reader.onload = () => {
                           try {
-                            setPhotoUrl(reader.result)
+                            const data = reader.result
+                            setPhotos(prev => {
+                              const next = [...(prev||[]), data].slice(0,3)
+                              if (next.length >= 3) {
+                                setPhotoUrl(next[0])
+                                setStep(2)
+                              } else {
+                                message.info(t('photos_needed_notify') || `Please take ${3 - next.length} more photos`)
+                              }
+                              return next
+                            })
                           } catch(e) {}
-                          // after taking photo, jump to AI Generated step
-                          setStep(2)
                         }
                         reader.readAsDataURL(f)
                       }}
@@ -682,8 +724,11 @@ export default function TokenView() {
                       <span></span><span></span><span></span><span></span>
                       {t('take_photo_btn')}
                     </a>
-                    <div style={{ marginLeft: 12 }}>
-                      <Button className="ui-btn" onClick={() => setStep(1)}>{t('previous_step')}</Button>
+                    <div style={{ marginLeft: 12, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
+                      <div style={{ color: 'var(--muted)', fontSize: 13 }}>{t('photos_needed_label') || 'Photos' }: {photos.length}/3</div>
+                      <div>
+                        <Button className="ui-btn" onClick={() => setStep(1)}>{t('previous_step')}</Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -777,8 +822,10 @@ export default function TokenView() {
                         <div style={{ whiteSpace: 'pre-wrap' }}>{aiResult}</div>
                       </div>
                     ) : (
-                      // intentionally blank (user requested removing demo text and stars)
-                      <div style={{ height: 24 }} />
+                      // placeholder prompting user to click generate
+                      <div style={{ height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)' }}>
+                        {t('click_generate_review') || '点击生成评价'}
+                      </div>
                     )}
                     {/* Single copy button below results */}
                     <div style={{ marginTop: 8, display: 'flex', justifyContent: 'center' }}>
