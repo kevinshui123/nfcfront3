@@ -222,6 +222,38 @@ export default function TokenView() {
     }
   }, [])
 
+  // Post-process AI body: ensure at least one emoji, ensure JHU/Baltimore tag present, and format into paragraphs
+  const ensureEmojiTagAndFormat = (raw) => {
+    try {
+      let text = (raw || '').trim()
+      if (!text) return text
+      // emoji regex ranges (common emoji blocks)
+      const emojiRe = /[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}]/u
+      if (!emojiRe.test(text)) {
+        // append a pepper emoji to satisfy requirement
+        text = text + ' 🌶️'
+      }
+      // Ensure #JHU or #Baltimore exists (case-insensitive)
+      const hasJHU = /#\s*JHU/i.test(text)
+      const hasBalt = /#\s*Baltimore/i.test(text)
+      if (!hasJHU && !hasBalt) {
+        text = text + ' #JHU'
+      }
+      // Split into sentence-like chunks for better paragraphing
+      const sentenceRe = /[^。！？.!?]+[。！？.!?]?/g
+      const parts = text.match(sentenceRe) || [text]
+      const paras = []
+      for (let i = 0; i < parts.length; i += 2) {
+        const grp = parts.slice(i, i + 2).join('').trim()
+        if (grp) paras.push(grp)
+      }
+      const final = paras.join('\n\n').trim()
+      return final || text
+    } catch (e) {
+      return raw
+    }
+  }
+
   // anime.js CTA pulse and progress particles
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -642,7 +674,7 @@ Do not restrict length — let the model decide. Each generation MUST be differe
           if (title || body) {
             const normalized = extractAndNormalize(title, body)
             if (normalized.title) setAiTitle(normalized.title)
-            setAiResult(normalized.body)
+            setAiResult(ensureEmojiTagAndFormat(normalized.body))
           }
         } catch (e) {}
         message.success(t('ai_generated'))
@@ -692,9 +724,9 @@ Do not restrict length — let the model decide. Each generation MUST be differe
             }
             const normalized = normalize(title, body)
             if (normalized.title) setAiTitle(normalized.title)
-            setAiResult(normalized.body)
+            setAiResult(ensureEmojiTagAndFormat(normalized.body))
           } else {
-            setAiResult(text)
+            setAiResult(ensureEmojiTagAndFormat(text))
           }
         } catch(e){ setAiResult(text) }
         message.success(t('ai_generated'))
