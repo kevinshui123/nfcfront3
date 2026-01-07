@@ -458,7 +458,9 @@ export default function TokenView() {
         const persona = personas[Math.floor(Math.random() * personas.length)]
 
         const platformKey = platformId || 'instagram'
-        const tmpl = (platformTemplates[platformKey] && platformTemplates[platformKey][isZh ? 'zh' : 'en']) || (isZh ? '写一条简短评价。' : 'Write a short review.')
+        // force English template for Google regardless of UI language
+        const tmplLang = (platformKey === 'google') ? 'en' : (isZh ? 'zh' : 'en')
+        const tmpl = (platformTemplates[platformKey] && platformTemplates[platformKey][tmplLang]) || (isZh ? '写一条简短评价。' : 'Write a short review.')
         const userText = (userPrompt && String(userPrompt).trim()) || tmpl.replace('{persona}', persona)
 
         // attach only first photo to reduce payload; instruct model to use visible info only
