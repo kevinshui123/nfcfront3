@@ -29,7 +29,7 @@ export default function TopControls() {
     <div className="top-controls" aria-hidden="false">
       {/* Theme toggle removed; app uses dark theme only */}
       <Tooltip title={lang === 'en' ? 'Switch to 中文' : '切换到 English'}>
-        <Button shape="round" onClick={() => setLang(prev => prev === 'en' ? 'zh' : 'en')} style={{ marginLeft: 8 }} aria-label="lang-toggle">
+        <Button shape="round" onClick={() => setLang(prev => prev === 'en' ? 'zh' : 'en')} style={{ marginLeft: 0, verticalAlign: 'middle' }} aria-label="lang-toggle">
           <GlobalOutlined /> {lang === 'en' ? 'EN' : '中文'}
         </Button>
       </Tooltip>
