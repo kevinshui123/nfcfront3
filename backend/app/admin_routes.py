@@ -232,17 +232,19 @@ async def get_merchant_dashboard(shop_id: str, db: AsyncSession = Depends(get_db
 
     try:
         today = __import__('datetime').date.today()
+        # visits: count visits where visit.tag_id belongs to tags of this shop
         visits_result = await db.execute(
-            "SELECT COUNT(*) FROM visits WHERE shop_id = :shop_id AND DATE(created_at) = :today",
-            {"shop_id": shop_id, "today": today}
+            "SELECT COUNT(*) FROM visits WHERE tag_id IN (SELECT id FROM nfc_tags WHERE shop_id = :shop_id)",
+            {"shop_id": shop_id}
         )
         visits = visits_result.scalar() or 0
     except Exception:
         visits = 0
 
     try:
+        # reviews: count content_items for this shop (today)
         reviews_result = await db.execute(
-            "SELECT COUNT(*) FROM contents WHERE shop_id = :shop_id AND DATE(created_at) = :today",
+            "SELECT COUNT(*) FROM content_items WHERE shop_id = :shop_id AND DATE(created_at) = :today",
             {"shop_id": shop_id, "today": today}
         )
         reviews = reviews_result.scalar() or 0
@@ -250,11 +252,12 @@ async def get_merchant_dashboard(shop_id: str, db: AsyncSession = Depends(get_db
         reviews = 0
 
     try:
+        # recent contents: select id, title, created_at from content_items
         contents_result = await db.execute(
-            "SELECT id, title, token, platform, created_at FROM contents WHERE shop_id = :shop_id ORDER BY created_at DESC LIMIT 50",
+            "SELECT id, title, created_at FROM content_items WHERE shop_id = :shop_id ORDER BY created_at DESC LIMIT 50",
             {"shop_id": shop_id}
         )
-        contents = [{"id": r[0], "title": r[1], "token": r[2], "platform": r[3] or "unknown", "created_at": r[4].isoformat() if r[4] else None} for r in contents_result.fetchall()]
+        contents = [{"id": r[0], "title": r[1], "token": None, "platform": "unknown", "created_at": r[2].isoformat() if r[2] else None} for r in contents_result.fetchall()]
     except Exception:
         contents = []
 
