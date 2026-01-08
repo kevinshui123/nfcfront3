@@ -273,10 +273,36 @@ export default function TokenView() {
         if (hasEmoji) return p.trim()
         // find matching keyword
         for (const m of keywordEmoji) {
-          if (m.k.test(p)) return (p.trim() + ' ' + m.e)
+          if (m.k.test(p)) {
+            // insert emoji at random position inside the sentence
+            const trimmed = p.trim()
+            const len = trimmed.length
+            if (/\s/.test(trimmed)) {
+              // English-like: insert after a random word
+              const words = trimmed.split(/\s+/)
+              const idx = Math.max(0, Math.min(words.length - 1, Math.floor(Math.random() * words.length)))
+              words[idx] = words[idx] + ' ' + m.e
+              return words.join(' ')
+            } else {
+              // Chinese: insert at a random char position (not at ends)
+              const pos = Math.max(1, Math.min(len - 1, Math.floor(Math.random() * len)))
+              return trimmed.slice(0, pos) + m.e + trimmed.slice(pos)
+            }
+          }
         }
-        // else append a random mild emoji
-        return (p.trim() + ' ' + emojiPool[Math.floor(Math.random() * emojiPool.length)])
+        // else insert a random mild emoji at a random position
+        const randEmoji = emojiPool[Math.floor(Math.random() * emojiPool.length)]
+        const trimmed = p.trim()
+        if (/\s/.test(trimmed)) {
+          const words = trimmed.split(/\s+/)
+          const idx = Math.max(0, Math.min(words.length - 1, Math.floor(Math.random() * words.length)))
+          words[idx] = words[idx] + ' ' + randEmoji
+          return words.join(' ')
+        } else {
+          const len = trimmed.length
+          const pos = Math.max(1, Math.min(len - 1, Math.floor(Math.random() * len)))
+          return trimmed.slice(0, pos) + randEmoji + trimmed.slice(pos)
+        }
       })
       // recombine
       text = newParts.join(' ')
@@ -320,20 +346,52 @@ export default function TokenView() {
   }
 
   // Helper to apply final post-processing and ensure title fallback is set
-  const applyPostProcessing = (rawBody, providedTitle) => {
-    const formatted = ensureEmojiTagAndFormat(rawBody, providedTitle)
-    setAiResult(formatted)
-    // ensure title exists: prefer providedTitle, else derive from formatted first line/sentence
-    if (!aiTitle) {
+  const applyPostProcessing = (rawBody, providedTitle, platform = 'xiaohongshu') => {
+    // produce formatted text (may inject emojis/tags only for xiaohongshu)
+    const formatted = ensureEmojiTagAndFormat(rawBody, providedTitle, platform)
+
+    // Remove any leading duplicate title-ish text from formatted
+    let cleaned = formatted
+    try {
       if (providedTitle && providedTitle.trim()) {
-        setAiTitle(providedTitle.trim())
+        const normalize = s => (s || '').replace(/[\s\p{P}\p{S}]+/gu, '').toLowerCase()
+        const nTitle = normalize(providedTitle)
+        const firstLine = (cleaned.split(/\r?\n/)[0] || '').trim()
+        const nFirst = normalize(firstLine)
+        if (nTitle && nFirst && (nFirst.startsWith(nTitle) || nTitle.startsWith(nFirst))) {
+          const lines = cleaned.split(/\r?\n/)
+          lines.shift()
+          cleaned = lines.join('\n').trim()
+        } else {
+          const esc = providedTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+          const leadingRe = new RegExp('^\\s*' + esc + '(\\s*[:：，,\\-\\u2014–—]*)?\\s*(\\n\\s*)?', 'i')
+          cleaned = cleaned.replace(leadingRe, '').trim()
+        }
       } else {
-        // derive first non-empty line or first sentence
-        const firstLine = (formatted.split(/\r?\n/)[0] || '').trim()
-        const firstSentence = (firstLine.match(/[^。！？.!?]+[。！？.!?]?/) || [firstLine])[0] || firstLine
-        const candidate = firstSentence ? (firstSentence.length > 60 ? firstSentence.slice(0,60) + '…' : firstSentence) : ''
-        if (candidate) setAiTitle(candidate)
+        // remove exact duplicate first-line if present
+        const lines = cleaned.split(/\r?\n/).map(l=>l.trim()).filter(Boolean)
+        if (lines.length > 1 && lines[1] && lines[0] && lines[1].startsWith(lines[0])) {
+          lines.shift()
+          cleaned = lines.join('\n').trim()
+        }
       }
+    } catch (e) {}
+
+    setAiResult(cleaned)
+
+    // set title: prefer providedTitle, else derive from cleaned first line/sentence; truncate to 20 chars
+    let finalTitle = ''
+    if (providedTitle && providedTitle.trim()) finalTitle = providedTitle.trim()
+    else {
+      const firstLine = (cleaned.split(/\r?\n/)[0] || '').trim()
+      const firstSentence = (firstLine.match(/[^。！？.!?]+[。！？.!?]?/) || [firstLine])[0] || firstLine
+      finalTitle = firstSentence || ''
+    }
+    if (finalTitle) {
+      if (finalTitle.length > 20) {
+        finalTitle = finalTitle.slice(0, 20) + '…'
+      }
+      setAiTitle(finalTitle)
     }
   }
 
@@ -760,7 +818,7 @@ Do not restrict length — let the model decide. Each generation MUST be differe
           if (title || body) {
             const normalized = extractAndNormalize(title, body)
             if (normalized.title) setAiTitle(normalized.title)
-            applyPostProcessing(normalized.body, normalized.title)
+            applyPostProcessing(normalized.body, normalized.title, platformId)
           }
         } catch (e) {}
         message.success(t('ai_generated'))
@@ -810,11 +868,11 @@ Do not restrict length — let the model decide. Each generation MUST be differe
             }
             const normalized = normalize(title, body)
             if (normalized.title) setAiTitle(normalized.title)
-            applyPostProcessing(normalized.body, normalized.title)
+            applyPostProcessing(normalized.body, normalized.title, platformId)
           } else {
-            applyPostProcessing(text)
+            applyPostProcessing(text, null, platformId)
           }
-        } catch(e){ applyPostProcessing(text) }
+        } catch(e){ applyPostProcessing(text, null, platformId) }
         message.success(t('ai_generated'))
       }
     } catch (e) {
