@@ -247,37 +247,57 @@ export default function TokenView() {
         }
       }
 
-      // Ensure a reasonable number of emojis (min 8) by appending varied emoji if needed
-      const emojiReGlobal = /[\p{Emoji}\u{2600}-\u{27BF}]/gu
-      const existingEmojis = (text.match(emojiReGlobal) || [])
-      const emojiPool = ['📸','🍖','🌶️','🥬','😍','💥','🏃‍♀️','🀄️','😋','💚','🤍','🍚','👭','✨','✅','📍','🎉','😮']
-      if (existingEmojis.length < 8) {
-        const need = 8 - existingEmojis.length
-        for (let i = 0; i < need; i++) {
-          const e = emojiPool[(Math.floor(Math.random() * emojiPool.length))]
-          text += ' ' + e
-        }
+      // Split into sentences early so we can inject emojis inline per-sentence
+      const sentenceSplitRe = /[^。！？.!?]+[。！？.!?]?/g
+      let parts1 = text.match(sentenceSplitRe)
+      if (!parts1 || parts1.length === 0) {
+        parts1 = text.match(/.{1,40}(?:\s|$)/g) || [text]
       }
 
-      // Ensure presence of multiple tags; prefer existing then append from pool until up to 6 tags
-      const tagPool = ['#JHU','#Baltimore','#Foodie','#探店','#小碗菜','#宝藏小店','#周末去哪儿','#打卡','#学生党','#午餐推荐','#打工人']
-      const foundTags = new Set()
+      // emoji mapping by keyword to produce contextual inline emojis
+      const keywordEmoji = [
+        {k: /拍照|照片|出片|拍照/g, e: '📸'},
+        {k: /牛肉|红烧肉|肉/g, e: '🥩'},
+        {k: /麻|麻将|牌/g, e: '🀄️'},
+        {k: /辛辣|辣|麻/g, e: '🌶️'},
+        {k: /好吃|美味|赞|满足/g, e: '😋'},
+        {k: /学生|上班|打工/g, e: '👭'},
+        {k: /位置|地址|JHU|Baltimore/g, e: '📍'},
+        {k: /推荐|必点|强烈推荐/g, e: '✅'},
+      ]
+
+      // ensure at least one emoji per sentence when possible by keyword, else random
+      const emojiPool = ['📸','🍖','🌶️','🥬','😍','💥','🏃‍♀️','🀄️','😋','💚','🤍','🍚','👭','✨','✅','📍','🎉','😮']
+      const newParts = parts1.map(p => {
+        const hasEmoji = /[\p{Emoji}\u{2600}-\u{27BF}]/u.test(p)
+        if (hasEmoji) return p.trim()
+        // find matching keyword
+        for (const m of keywordEmoji) {
+          if (m.k.test(p)) return (p.trim() + ' ' + m.e)
+        }
+        // else append a random mild emoji
+        return (p.trim() + ' ' + emojiPool[Math.floor(Math.random() * emojiPool.length)])
+      })
+      // recombine
+      text = newParts.join(' ')
+
+      // collect existing tags and append more up to 6
+      const tagPool = ['#JHU','#Baltimore','#Foodie','#探店','#小碗菜','#宝藏小店','#周末去哪儿','#打卡','#学生党','#午餐推荐','#打工人','#宝藏']
       const hashtagRe = /#([^\s#，。,。!！?？]+)/g
+      const foundTags = new Set()
       let hm
       while ((hm = hashtagRe.exec(text))) {
         foundTags.add('#' + hm[1])
       }
-      // append until we have up to 6 tags
       for (const candidate of tagPool) {
-        if (foundTags.size >= 6) break
+        if (foundTags.size >= 8) break
         if (![...foundTags].map(s=>s.toLowerCase()).includes(candidate.toLowerCase())) {
           foundTags.add(candidate)
         }
       }
-      // ensure tags are present at end as a block
-      const tagsArr = Array.from(foundTags)
-      // remove any existing inline tags from body (we'll append a cleaned block)
+      // remove inline tags and append cleaned block
       const cleanBody = text.replace(hashtagRe, '').replace(/\s{2,}/g,' ').trim()
+      const tagsArr = Array.from(foundTags).slice(0,8)
       text = cleanBody + (tagsArr.length ? (' ' + tagsArr.join(' ')) : '')
 
       // Paragraphing: split by sentence-ending punctuation; produce smaller paragraphs (1 sentence each preferably)
@@ -1036,20 +1056,7 @@ Do not restrict length — let the model decide. Each generation MUST be differe
                 <div className="step step-2" style={{ marginTop: 8 }}>
                   <div style={{ padding: 12, background: 'rgba(255,255,255,0.02)', borderRadius: 8, minHeight: 140, color: 'var(--text)' }}>
                     <>
-                      {aiTitle ? (
-                        <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center' }}>
-                          <div style={{ background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: 8, maxWidth: 640, width: '100%' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-                              <div style={{ fontWeight: 700, fontSize: 16, wordBreak: 'break-word' }}>{aiTitle}</div>
-                              <div>
-                                <Button onClick={() => {
-                                  try { navigator.clipboard.writeText(aiTitle); message.success(t('copied')) } catch(e){ message.error(t('copy_failed')) }
-                                }}>{t('copy_title') || '复制标题'}</Button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ) : null}
+                      {/* Title preview moved to publish page - do not show title box here */}
 
                       {aiLoading ? (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', justifyContent: 'center', padding: 12 }}>
