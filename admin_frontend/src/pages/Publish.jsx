@@ -56,6 +56,28 @@ export default function PublishPage() {
     } catch (e) {}
   }, [location])
 
+  const cleanBodyForDisplay = (rawBody, rawTitle) => {
+    try {
+      let b = (rawBody || '').trim()
+      const t = (rawTitle || '').trim()
+      if (!b) return ''
+      if (t) {
+        // remove leading occurrence of title (exact or substring) from body
+        const esc = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        const leadingRe = new RegExp('^\\s*' + esc + '(\\s*[:：，,\\-\\u2014–—]*)?\\s*(\\n\\s*)?', 'i')
+        b = b.replace(leadingRe, '').trim()
+      } else {
+        // also remove accidental duplicate first-line that repeats twice
+        const lines = b.split(/\r?\n/).map(l=>l.trim()).filter(Boolean)
+        if (lines.length>1 && lines[0].length<80 && lines[1].startsWith(lines[0])) {
+          lines.shift()
+          b = lines.join('\n\n')
+        }
+      }
+      return b
+    } catch (e) { return rawBody || '' }
+  }
+
   const copyAndOpen = async () => {
     try {
       const payload = `${title || ''}\n\n${body || ''}`
@@ -92,7 +114,7 @@ export default function PublishPage() {
                   </div>
                   <div style={{ whiteSpace: 'pre-wrap', color: 'var(--muted)' }}>{body || '（正文为空）'}</div>
                 </div>
-                <div style={{ display: 'flex', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', width: '100%' }}>
                   <Button onClick={async () => {
                     try {
                       await navigator.clipboard.writeText(title || '')
@@ -101,7 +123,8 @@ export default function PublishPage() {
                   }}>复制标题</Button>
                   <Button onClick={async () => {
                     try {
-                      await navigator.clipboard.writeText(body || '')
+                      const display = cleanBodyForDisplay(body, title)
+                      await navigator.clipboard.writeText(display || '')
                       message.success('正文已复制')
                     } catch (e) { message.error('复制失败') }
                   }}>复制正文</Button>
