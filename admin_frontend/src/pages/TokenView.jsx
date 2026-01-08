@@ -38,6 +38,7 @@ export default function TokenView() {
   const [aiTitle, setAiTitle] = useState(null)
   const [photoUrl, setPhotoUrl] = useState(null)
   const [photos, setPhotos] = useState([]) // accumulate up to 3 photos
+  const [xhsStyle, setXhsStyle] = useState('real') // 'real' | 'influencer' | 'short'
   const [aiLoading, setAiLoading] = useState(false)
   const [aiProgress, setAiProgress] = useState(0)
   const [pubLoading, setPubLoading] = useState(false)
@@ -678,27 +679,24 @@ Do not restrict length — let the model choose. Each generation MUST be differe
           // force English user message for Google
           userMsg = 'Write a short, factual Google Maps review in English. Use 1-3 short sentences. Do NOT include emojis or hashtags. Keep it concise and objective.'
         } else if (platformId === 'xiaohongshu') {
-          // Xiaohongshu: strongly request TITLE + BODY with emojis and casual voice.
-          // Force examples and explicit emoji counts to encourage emoji usage.
+          // Xiaohongshu: choose prompt based on selected xhsStyle
           const locationHint = Math.random() < 0.35 ? (isZh ? '店铺位于 Baltimore，靠近 JHU。' : 'The shop is located in Baltimore near JHU.') : ''
-          const exampleEn = `EXAMPLES:
-TITLE: I declare 📣 this is the "雀神" of small-bowl dishes! 🀄️💥
-
-BODY: 家人们！今天挖到宝了～這家店的麻将盒子太好拍照了📸，味道也在线，鸿运当头红烧肉超下饭😍。#小碗菜探店`
-          const exampleZh = `示例：
-标题: 我宣布📣这就是小碗菜界的“雀神”🀄️！
-
-正文: 家人们～今天挖到宝了！麻将饭盒超出片📸，红烧肉又香又软，性价比超高💰。#宝藏小店`
-
-          const promptXhsEn = `${platformTemplates.xiaohongshu.en} ${locationHint} Write a Rednote-style shop recommendation for Mahjong (TITLE + BODY).
-OUTPUT: one TITLE line prefixed by "TITLE:" (short; avoid hashtags in title), one blank line, then BODY.
-Do not restrict length — let the model decide. Each generation MUST be different in persona and wording; vary narrative style. Emojis and tags optional; do not include any photo-suggestion text. Do not invent dishes beyond visible items. ${exampleEn}`
-
-          const promptXhsZh = `${platformTemplates.xiaohongshu.zh} ${locationHint} 请写一条小红书探店/推荐（标题 + 正文）。
-输出：单行标题，前缀为 "标题:"（简短，标题中尽量不要带话题标签），空一行，然后正文。
-不要限制长度，让模型决定每条篇幅。每次生成必须不同（变换角色和叙事方式）。Emoji 与话题可选。不要写拍照建议，不要杜撰图片中没有的菜品。${exampleZh}`
-
-          userMsg = isZh ? promptXhsZh : promptXhsEn
+          const stylePrompts = {
+            real: {
+              en: `Option 1 - Real student voice: Write a candid shop recommendation like a JHU student. TITLE + BODY. Use friendly, real-sounding language, paragraphs, inline emojis matching content, and end with several relevant tags. Mention location if natural. ${locationHint}`,
+              zh: `选项一 - JHU 学生视角：以真实口语写探店推荐（标题 + 正文）。语气真实、段落分明，句内适当插 emoji，与内容相关；正文末尾带若干话题标签。可自然包含店铺位置信息。`
+            },
+            influencer: {
+              en: `Option 2 - Influencer style: Write a photo-friendly, descriptive post emphasizing taste and visuals. TITLE + BODY. Use sensory adjectives, a short anecdote, inline emojis, and a clear call-to-action. Add tags at the end.`,
+              zh: `选项二 - 博主安利风：写图文感强的探店文（标题 + 正文），强调味道与画面，带感官描写与小故事，句内可加 emoji，结尾带话题。`
+            },
+            short: {
+              en: `Option 3 - Short caption: Short, punchy review suitable for quick posts. TITLE + BODY. Keep concise, one-sentence title and 2-4 short sentences. Add one or two tags.`,
+              zh: `选项三 - 简洁短评：短小精悍（标题 + 正文），标题一句，正文 2-4 句，适合配随手拍，结尾可加 1-2 个话题。`
+            }
+          }
+          const chosen = stylePrompts[xhsStyle] || stylePrompts.real
+          userMsg = isZh ? chosen.zh : chosen.en
         } else {
           if (platformId === 'facebook') {
             // Facebook: pick one of three casual styles
@@ -1128,6 +1126,17 @@ Do not restrict length — let the model decide. Each generation MUST be differe
                           {t('generate')}
                         </a>
                       </div>
+                      {/* Xiaohongshu style selector */}
+                      {selected.includes('xiaohongshu') && (
+                        <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center', gap: 12 }}>
+                          <div style={{ color: 'var(--muted)', alignSelf: 'center' }}>小红书风格:</div>
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <Button size="small" type={xhsStyle === 'real' ? 'primary' : 'default'} onClick={() => setXhsStyle('real')}>真实探店</Button>
+                            <Button size="small" type={xhsStyle === 'influencer' ? 'primary' : 'default'} onClick={() => setXhsStyle('influencer')}>博主安利</Button>
+                            <Button size="small" type={xhsStyle === 'short' ? 'primary' : 'default'} onClick={() => setXhsStyle('short')}>简洁短评</Button>
+                          </div>
+                        </div>
+                      )}
                     </>
                   )}
                 </div>
