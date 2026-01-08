@@ -222,26 +222,20 @@ export default function TokenView() {
     }
   }, [])
 
-  // Post-process AI body: ensure at least one emoji, ensure JHU/Baltimore tag present, and format into paragraphs
+  // Post-process AI body: remove leading title labels and format into paragraphs.
+  // NOTE: Do not modify content (no emoji/tag injection) — only adjust layout.
   const ensureEmojiTagAndFormat = (raw) => {
     try {
       let text = (raw || '').trim()
       if (!text) return text
-      // emoji regex ranges (common emoji blocks)
-      const emojiRe = /[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}]/u
-      if (!emojiRe.test(text)) {
-        // append a pepper emoji to satisfy requirement
-        text = text + ' 🌶️'
-      }
-      // Ensure #JHU or #Baltimore exists (case-insensitive)
-      const hasJHU = /#\s*JHU/i.test(text)
-      const hasBalt = /#\s*Baltimore/i.test(text)
-      if (!hasJHU && !hasBalt) {
-        text = text + ' #JHU'
-      }
-      // Split into sentence-like chunks for better paragraphing
+      // Remove leading title lines like "标题:" or "TITLE:"
+      text = text.replace(/^\s*(标题[:：]|TITLE[:：])\s*/i, '')
+      // Also remove any leading lines that look like a title (short line followed by blank line)
+      text = text.replace(/^\s*([^\n]{1,120})\n\s*\n/, (m, p1) => p1 + '\n\n')
+      // Split into sentence-like chunks for paragraphing while preserving emojis and punctuation.
       const sentenceRe = /[^。！？.!?]+[。！？.!?]?/g
       const parts = text.match(sentenceRe) || [text]
+      // Group into paragraphs of 1-2 sentences for readability
       const paras = []
       for (let i = 0; i < parts.length; i += 2) {
         const grp = parts.slice(i, i + 2).join('').trim()
