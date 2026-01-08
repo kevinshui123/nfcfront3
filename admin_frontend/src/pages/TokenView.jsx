@@ -625,8 +625,9 @@ Do not restrict length — let the model decide. Each generation MUST be differe
         const decoder = new TextDecoder('utf-8')
         let done = false
         let buffer = ''
-          setAiResult('') // reset
-          setAiTitle(null)
+        let streamText = '' // accumulate server stream reliably
+        setAiResult('') // reset
+        setAiTitle(null)
         while (!done) {
           const { value, done: d } = await reader.read()
           done = d
@@ -650,7 +651,9 @@ Do not restrict length — let the model decide. Each generation MUST be differe
                   const c = choices[0]
                   const token = (c.delta && c.delta.content) || (c.message && c.message.content) || ''
                   if (token) {
-                    setAiResult(prev => prev + token)
+                    // update local accumulator and state together
+                    streamText += token
+                    setAiResult(streamText)
                   }
                 }
               } catch (e) {
@@ -659,10 +662,10 @@ Do not restrict length — let the model decide. Each generation MUST be differe
             }
           }
         }
-        // finished - parse possible TITLE: / 标题:
+        // finished - parse using the accumulated streamText (not state)
         await new Promise(res => setTimeout(res, 120))
         try {
-          const txt = aiResult || ''
+          const txt = streamText || aiResult || ''
           const titleMatchEn = txt.match(/TITLE:\s*(.+?)\s*\n\s*BODY:\s*([\s\S]+)/i)
           const titleMatchZh = txt.match(/标题[:：]\s*(.+?)\s*\n\s*正文[:：]?\s*([\s\S]+)/i)
           let title = null
