@@ -1026,13 +1026,13 @@ Do not restrict length — let the model decide. Each generation MUST be differe
                         reader.onload = () => {
                           try {
                             const data = reader.result
-                            setPhotos(prev => {
-                              const next = [...(prev||[]), data].slice(0,3)
-                              if (next.length >= 3) {
-                                setPhotoUrl(next[0])
-                                setStep(2)
-                              } else {
-                                message.info(t('photos_needed_notify') || `Please take ${3 - next.length} more photos`)
+                        setPhotos(prev => {
+                              const next = [...(prev||[]), data].slice(0,9) // allow up to 9 photos
+                              // update primary preview photo
+                              if (next.length > 0) setPhotoUrl(next[0])
+                              // do not auto-advance — user can take any number then press Generate
+                              if (next.length === 0) {
+                                message.info(t('photos_needed_notify') || `Please take at least one photo`)
                               }
                               return next
                             })
@@ -1208,10 +1208,17 @@ Do not restrict length — let the model decide. Each generation MUST be differe
                     </div>
                   </div>
                   <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center' }}>
-                    <Button className="ui-btn ui-btn-primary full-cta" onClick={() => {
+                      <Button className="ui-btn ui-btn-primary full-cta" onClick={() => {
                       const first = selected[0] || (platforms[0] && platforms[0].id)
                       if (!first) { message.info(t('no_platform_selected')); return }
-                      navigate(`/t/${token}/publish/${first}`, { state: { title: aiTitle, body: aiResult, photo: photoUrl, photos } })
+                      const cleanedBody = ensureEmojiTagAndFormat(aiResult || '', aiTitle || '', first)
+                      let finalTitle = aiTitle || ''
+                      if (!finalTitle) {
+                        const firstLine = (cleanedBody.split(/\r?\n/)[0] || '').trim()
+                        finalTitle = firstLine
+                      }
+                      if (finalTitle && finalTitle.length > 20) finalTitle = finalTitle.slice(0,20) + '…'
+                      navigate(`/t/${token}/publish/${first}`, { state: { title: finalTitle, body: cleanedBody, photo: photoUrl, photos } })
                     }} style={{ minWidth: 220 }}>{t('next_open_platform')}</Button>
                   </div>
                 </div>
