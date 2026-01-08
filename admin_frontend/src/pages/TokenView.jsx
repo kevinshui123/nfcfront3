@@ -222,20 +222,51 @@ export default function TokenView() {
     }
   }, [])
 
-  // Post-process AI body: remove leading title labels and format into paragraphs.
-  // NOTE: Do not modify content (no emoji/tag injection) — only adjust layout.
-  const ensureEmojiTagAndFormat = (raw) => {
+  // Post-process AI body: remove duplicate title, ensure emoji/tag presence, and format into paragraphs.
+  // This will minimally inject one emoji or a #JHU tag if missing, but will not rewrite content.
+  const ensureEmojiTagAndFormat = (raw, providedTitle) => {
     try {
       let text = (raw || '').trim()
       if (!text) return text
-      // Remove leading title lines like "标题:" or "TITLE:"
-      text = text.replace(/^\s*(标题[:：]|TITLE[:：])\s*/i, '')
-      // Also remove any leading lines that look like a title (short line followed by blank line)
-      text = text.replace(/^\s*([^\n]{1,120})\n\s*\n/, (m, p1) => p1 + '\n\n')
-      // Split into sentence-like chunks for paragraphing while preserving emojis and punctuation.
+
+      // Remove leading explicit title markers like "标题:" or "TITLE:"
+      text = text.replace(/^\s*(标题[:：]\s*|TITLE[:：]\s*)/i, '')
+
+      // If a title is provided and body starts with that title, remove the duplicate leading title text
+      if (providedTitle) {
+        const escaped = providedTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        const dupRe = new RegExp('^\\s*' + escaped + '\\s*\\n', 'i')
+        text = text.replace(dupRe, '')
+      } else {
+        // If no providedTitle, try to detect a short first-line repeated as both title and body.
+        const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
+        if (lines.length > 1 && lines[0].length < 60 && lines[1].length > 0 && lines[1].startsWith(lines[0])) {
+          // remove first line if it's duplicated
+          lines.shift()
+          text = lines.join('\n')
+        }
+      }
+
+      // Ensure at least one emoji exists; if not, append a neutral emoji
+      const emojiRe = /[\p{Emoji}\u{2600}-\u{27BF}]/u
+      if (!emojiRe.test(text)) {
+        text = text + ' 🌶️'
+      }
+
+      // Ensure presence of #JHU or #Baltimore; if missing, append #JHU
+      const hasJHU = /#\s*JHU/i.test(text)
+      const hasBalt = /#\s*Baltimore/i.test(text)
+      if (!hasJHU && !hasBalt) {
+        text = text + ' #JHU'
+      }
+
+      // Paragraphing: split by sentence-ending punctuation; if none, split by length
       const sentenceRe = /[^。！？.!?]+[。！？.!?]?/g
-      const parts = text.match(sentenceRe) || [text]
-      // Group into paragraphs of 1-2 sentences for readability
+      let parts = text.match(sentenceRe)
+      if (!parts || parts.length === 0) {
+        // fallback: split every ~60 chars
+        parts = text.match(/.{1,60}(?:\s|$)/g) || [text]
+      }
       const paras = []
       for (let i = 0; i < parts.length; i += 2) {
         const grp = parts.slice(i, i + 2).join('').trim()
@@ -668,7 +699,7 @@ Do not restrict length — let the model decide. Each generation MUST be differe
           if (title || body) {
             const normalized = extractAndNormalize(title, body)
             if (normalized.title) setAiTitle(normalized.title)
-            setAiResult(ensureEmojiTagAndFormat(normalized.body))
+            setAiResult(ensureEmojiTagAndFormat(normalized.body, normalized.title))
           }
         } catch (e) {}
         message.success(t('ai_generated'))
@@ -718,7 +749,7 @@ Do not restrict length — let the model decide. Each generation MUST be differe
             }
             const normalized = normalize(title, body)
             if (normalized.title) setAiTitle(normalized.title)
-            setAiResult(ensureEmojiTagAndFormat(normalized.body))
+            setAiResult(ensureEmojiTagAndFormat(normalized.body, normalized.title))
           } else {
             setAiResult(ensureEmojiTagAndFormat(text))
           }
