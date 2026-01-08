@@ -1050,14 +1050,14 @@ Do not restrict length — let the model choose. Each generation MUST be differe
                       <span></span><span></span><span></span><span></span>
                       {t('take_photo_btn')}
                     </a>
-                    <div style={{ marginLeft: 12, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
-                      <div style={{ color: 'var(--muted)', fontSize: 13 }}>{t('photos_needed_label') || 'Photos' }: {photos.length}/3</div>
-                      <div>
+                    <div style={{ marginLeft: 12, display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
+                      <div style={{ color: 'var(--muted)', fontSize: 13 }}>{t('photos_needed_label') || 'Photos' }: {photos.length}</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: 160 }}>
                         <Button className="ui-btn" onClick={() => setStep(1)}>{t('previous_step')}</Button>
-                        <Button className="ui-btn" style={{ marginLeft: 8 }} onClick={() => {
+                        <Button className="ui-btn" onClick={() => {
                           if (!photos || photos.length === 0) { message.info(t('photos_needed_notify') || 'Please take at least one photo'); return }
                           setStep(2)
-                        }}>{t('next_step') || '下一步'}</Button>
+                        }}>{t('next_step')}</Button>
                       </div>
                     </div>
                   </div>
@@ -1103,15 +1103,26 @@ Do not restrict length — let the model choose. Each generation MUST be differe
                           return (
                             <div key={p.id} role="listitem" onClick={() => {
                               setSelected(active ? selected.filter(s=>s!==p.id) : [...selected, p.id])
-                            }} className={`platform-chip ${active ? 'selected' : ''}`} aria-pressed={active}>
-                              <div className="chip-inner">
+                            }} className={`platform-chip ${active ? 'selected' : ''}`} aria-pressed={active} style={{ width: 200, padding: '8px 10px', margin: '6px auto' }}>
+                              <div className="chip-inner" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                                 <span className="chip-icon" aria-hidden>{p.icon}</span>
-                                <span className="chip-label">{p.label}</span>
+                                <span className="chip-label" style={{ fontSize: 14 }}>{p.label}</span>
                               </div>
                             </div>
                           )
                         })}
                       </div>
+                      {/* Xiaohongshu style selector - moved above generate button */}
+                      {selected.includes('xiaohongshu') && (
+                        <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center', gap: 12 }}>
+                          <div style={{ color: 'var(--muted)', alignSelf: 'center' }}>小红书风格:</div>
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <Button size="small" type={xhsStyle === 'real' ? 'primary' : 'default'} onClick={() => setXhsStyle('real')}>真实探店</Button>
+                            <Button size="small" type={xhsStyle === 'influencer' ? 'primary' : 'default'} onClick={() => setXhsStyle('influencer')}>博主安利</Button>
+                            <Button size="small" type={xhsStyle === 'short' ? 'primary' : 'default'} onClick={() => setXhsStyle('short')}>简洁短评</Button>
+                          </div>
+                        </div>
+                      )}
                       <div style={{ marginTop: 18, display: 'flex', justifyContent: 'center' }}>
                         <a
                           role="button"
@@ -1126,17 +1137,6 @@ Do not restrict length — let the model choose. Each generation MUST be differe
                           {t('generate')}
                         </a>
                       </div>
-                      {/* Xiaohongshu style selector */}
-                      {selected.includes('xiaohongshu') && (
-                        <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center', gap: 12 }}>
-                          <div style={{ color: 'var(--muted)', alignSelf: 'center' }}>小红书风格:</div>
-                          <div style={{ display: 'flex', gap: 8 }}>
-                            <Button size="small" type={xhsStyle === 'real' ? 'primary' : 'default'} onClick={() => setXhsStyle('real')}>真实探店</Button>
-                            <Button size="small" type={xhsStyle === 'influencer' ? 'primary' : 'default'} onClick={() => setXhsStyle('influencer')}>博主安利</Button>
-                            <Button size="small" type={xhsStyle === 'short' ? 'primary' : 'default'} onClick={() => setXhsStyle('short')}>简洁短评</Button>
-                          </div>
-                        </div>
-                      )}
                     </>
                   )}
                 </div>
