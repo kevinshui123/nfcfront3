@@ -62,10 +62,22 @@ export default function PublishPage() {
       const t = (rawTitle || '').trim()
       if (!b) return ''
       if (t) {
-        // remove leading occurrence of title (exact or substring) from body
-        const esc = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        const leadingRe = new RegExp('^\\s*' + esc + '(\\s*[:：，,\\-\\u2014–—]*)?\\s*(\\n\\s*)?', 'i')
-        b = b.replace(leadingRe, '').trim()
+        // fuzzy remove leading title-like text from body
+        const normalize = s => (s || '').replace(/[\s\p{P}\p{S}]+/gu, '').toLowerCase()
+        const nTitle = normalize(t)
+        const firstLine = (b.split(/\r?\n/)[0] || '').trim()
+        const nFirst = normalize(firstLine)
+        if (nTitle && nFirst && (nFirst.startsWith(nTitle) || nTitle.startsWith(nFirst))) {
+          // remove the first line entirely if it's effectively the same as title
+          const lines = b.split(/\r?\n/)
+          lines.shift()
+          b = lines.join('\n').trim()
+        } else {
+          // fallback exact-ish removal
+          const esc = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+          const leadingRe = new RegExp('^\\s*' + esc + '(\\s*[:：，,\\-\\u2014–—]*)?\\s*(\\n\\s*)?', 'i')
+          b = b.replace(leadingRe, '').trim()
+        }
       } else {
         // also remove accidental duplicate first-line that repeats twice
         const lines = b.split(/\r?\n/).map(l=>l.trim()).filter(Boolean)
@@ -114,7 +126,7 @@ export default function PublishPage() {
                   </div>
                   <div style={{ whiteSpace: 'pre-wrap', color: 'var(--muted)' }}>{body || '（正文为空）'}</div>
                 </div>
-                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', width: '100%' }}>
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'center', width: '100%', marginTop: 6 }}>
                   <Button onClick={async () => {
                     try {
                       await navigator.clipboard.writeText(title || '')
