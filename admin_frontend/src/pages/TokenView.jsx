@@ -247,35 +247,73 @@ export default function TokenView() {
         }
       }
 
-      // Ensure at least one emoji exists; if not, append a neutral emoji
-      const emojiRe = /[\p{Emoji}\u{2600}-\u{27BF}]/u
-      if (!emojiRe.test(text)) {
-        text = text + ' 🌶️'
+      // Ensure a reasonable number of emojis (min 8) by appending varied emoji if needed
+      const emojiReGlobal = /[\p{Emoji}\u{2600}-\u{27BF}]/ugu
+      const existingEmojis = (text.match(emojiReGlobal) || [])
+      const emojiPool = ['📸','🍖','🌶️','🥬','😍','💥','🏃‍♀️','🀄️','😋','💚','🤍','🍚','👭','✨','✅','📍','🎉','😮']
+      if (existingEmojis.length < 8) {
+        const need = 8 - existingEmojis.length
+        for (let i = 0; i < need; i++) {
+          const e = emojiPool[(Math.floor(Math.random() * emojiPool.length))]
+          text += ' ' + e
+        }
       }
 
-      // Ensure presence of #JHU or #Baltimore; if missing, append #JHU
-      const hasJHU = /#\s*JHU/i.test(text)
-      const hasBalt = /#\s*Baltimore/i.test(text)
-      if (!hasJHU && !hasBalt) {
-        text = text + ' #JHU'
+      // Ensure presence of multiple tags; prefer existing then append from pool until up to 6 tags
+      const tagPool = ['#JHU','#Baltimore','#Foodie','#探店','#小碗菜','#宝藏小店','#周末去哪儿','#打卡','#学生党','#午餐推荐','#打工人']
+      const foundTags = new Set()
+      const hashtagRe = /#([^\s#，。,。!！?？]+)/g
+      let hm
+      while ((hm = hashtagRe.exec(text))) {
+        foundTags.add('#' + hm[1])
       }
+      // append until we have up to 6 tags
+      for (const candidate of tagPool) {
+        if (foundTags.size >= 6) break
+        if (![...foundTags].map(s=>s.toLowerCase()).includes(candidate.toLowerCase())) {
+          foundTags.add(candidate)
+        }
+      }
+      // ensure tags are present at end as a block
+      const tagsArr = Array.from(foundTags)
+      // remove any existing inline tags from body (we'll append a cleaned block)
+      const cleanBody = text.replace(hashtagRe, '').replace(/\s{2,}/g,' ').trim()
+      text = cleanBody + (tagsArr.length ? (' ' + tagsArr.join(' ')) : '')
 
-      // Paragraphing: split by sentence-ending punctuation; if none, split by length
+      // Paragraphing: split by sentence-ending punctuation; produce smaller paragraphs (1 sentence each preferably)
       const sentenceRe = /[^。！？.!?]+[。！？.!?]?/g
       let parts = text.match(sentenceRe)
       if (!parts || parts.length === 0) {
-        // fallback: split every ~60 chars
-        parts = text.match(/.{1,60}(?:\s|$)/g) || [text]
+        // fallback: split every ~40 chars for denser paragraphs
+        parts = text.match(/.{1,40}(?:\s|$)/g) || [text]
       }
       const paras = []
-      for (let i = 0; i < parts.length; i += 2) {
-        const grp = parts.slice(i, i + 2).join('').trim()
+      for (let i = 0; i < parts.length; i += 1) {
+        const grp = parts[i].trim()
         if (grp) paras.push(grp)
       }
       const final = paras.join('\n\n').trim()
       return final || text
     } catch (e) {
       return raw
+    }
+  }
+
+  // Helper to apply final post-processing and ensure title fallback is set
+  const applyPostProcessing = (rawBody, providedTitle) => {
+    const formatted = ensureEmojiTagAndFormat(rawBody, providedTitle)
+    setAiResult(formatted)
+    // ensure title exists: prefer providedTitle, else derive from formatted first line/sentence
+    if (!aiTitle) {
+      if (providedTitle && providedTitle.trim()) {
+        setAiTitle(providedTitle.trim())
+      } else {
+        // derive first non-empty line or first sentence
+        const firstLine = (formatted.split(/\r?\n/)[0] || '').trim()
+        const firstSentence = (firstLine.match(/[^。！？.!?]+[。！？.!?]?/) || [firstLine])[0] || firstLine
+        const candidate = firstSentence ? (firstSentence.length > 60 ? firstSentence.slice(0,60) + '…' : firstSentence) : ''
+        if (candidate) setAiTitle(candidate)
+      }
     }
   }
 
@@ -702,7 +740,7 @@ Do not restrict length — let the model decide. Each generation MUST be differe
           if (title || body) {
             const normalized = extractAndNormalize(title, body)
             if (normalized.title) setAiTitle(normalized.title)
-            setAiResult(ensureEmojiTagAndFormat(normalized.body, normalized.title))
+            applyPostProcessing(normalized.body, normalized.title)
           }
         } catch (e) {}
         message.success(t('ai_generated'))
@@ -752,11 +790,11 @@ Do not restrict length — let the model decide. Each generation MUST be differe
             }
             const normalized = normalize(title, body)
             if (normalized.title) setAiTitle(normalized.title)
-            setAiResult(ensureEmojiTagAndFormat(normalized.body, normalized.title))
+            applyPostProcessing(normalized.body, normalized.title)
           } else {
-            setAiResult(ensureEmojiTagAndFormat(text))
+            applyPostProcessing(text)
           }
-        } catch(e){ setAiResult(text) }
+        } catch(e){ applyPostProcessing(text) }
         message.success(t('ai_generated'))
       }
     } catch (e) {
