@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+ import React, { useEffect, useState, useRef } from 'react'
 import AnimatedStrokeText from '../components/AnimatedStrokeText'
 import AnimatedSVGHeading from '../components/AnimatedSVGHeading'
 import ComplexSVGLogo from '../components/ComplexSVGLogo'
@@ -1056,6 +1056,10 @@ Do not restrict length — let the model decide. Each generation MUST be differe
                       <div style={{ color: 'var(--muted)', fontSize: 13 }}>{t('photos_needed_label') || 'Photos' }: {photos.length}/3</div>
                       <div>
                         <Button className="ui-btn" onClick={() => setStep(1)}>{t('previous_step')}</Button>
+                        <Button className="ui-btn" style={{ marginLeft: 8 }} onClick={() => {
+                          if (!photos || photos.length === 0) { message.info(t('photos_needed_notify') || 'Please take at least one photo'); return }
+                          setStep(2)
+                        }}>{t('next_step') || '下一步'}</Button>
                       </div>
                     </div>
                   </div>
