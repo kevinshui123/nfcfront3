@@ -248,7 +248,7 @@ export default function TokenView() {
       }
 
       // Ensure a reasonable number of emojis (min 8) by appending varied emoji if needed
-      const emojiReGlobal = /[\p{Emoji}\u{2600}-\u{27BF}]/ugu
+      const emojiReGlobal = /[\p{Emoji}\u{2600}-\u{27BF}]/gu
       const existingEmojis = (text.match(emojiReGlobal) || [])
       const emojiPool = ['📸','🍖','🌶️','🥬','😍','💥','🏃‍♀️','🀄️','😋','💚','🤍','🍚','👭','✨','✅','📍','🎉','😮']
       if (existingEmojis.length < 8) {
