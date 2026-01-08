@@ -124,7 +124,7 @@ export default function PublishPage() {
                       return '（无标题）'
                     })()}
                   </div>
-                  <div style={{ whiteSpace: 'pre-wrap', color: 'var(--muted)' }}>{body || '（正文为空）'}</div>
+                  <div style={{ whiteSpace: 'pre-wrap', color: 'var(--muted)' }}>{cleanBodyForDisplay(body, title) || '（正文为空）'}</div>
                 </div>
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'center', width: '100%', marginTop: 6 }}>
                   <Button onClick={async () => {

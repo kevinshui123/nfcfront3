@@ -307,24 +307,26 @@ export default function TokenView() {
       // recombine
       text = newParts.join(' ')
 
-      // collect existing tags and append more up to 6
-      const tagPool = ['#JHU','#Baltimore','#Foodie','#探店','#小碗菜','#宝藏小店','#周末去哪儿','#打卡','#学生党','#午餐推荐','#打工人','#宝藏']
-      const hashtagRe = /#([^\s#，。,。!！?？]+)/g
-      const foundTags = new Set()
-      let hm
-      while ((hm = hashtagRe.exec(text))) {
-        foundTags.add('#' + hm[1])
-      }
-      for (const candidate of tagPool) {
-        if (foundTags.size >= 8) break
-        if (![...foundTags].map(s=>s.toLowerCase()).includes(candidate.toLowerCase())) {
-          foundTags.add(candidate)
+      // collect existing tags and append more up to 8, but only for Xiaohongshu
+      if (platform === 'xiaohongshu') {
+        const tagPool = ['#JHU','#Baltimore','#Foodie','#探店','#小碗菜','#宝藏小店','#周末去哪儿','#打卡','#学生党','#午餐推荐','#打工人','#宝藏']
+        const hashtagRe = /#([^\s#，。,。!！?？]+)/g
+        const foundTags = new Set()
+        let hm
+        while ((hm = hashtagRe.exec(text))) {
+          foundTags.add('#' + hm[1])
         }
+        for (const candidate of tagPool) {
+          if (foundTags.size >= 8) break
+          if (![...foundTags].map(s=>s.toLowerCase()).includes(candidate.toLowerCase())) {
+            foundTags.add(candidate)
+          }
+        }
+        // remove inline tags and append cleaned block
+        const cleanBody = text.replace(hashtagRe, '').replace(/\s{2,}/g,' ').trim()
+        const tagsArr = Array.from(foundTags).slice(0,8)
+        text = cleanBody + (tagsArr.length ? (' ' + tagsArr.join(' ')) : '')
       }
-      // remove inline tags and append cleaned block
-      const cleanBody = text.replace(hashtagRe, '').replace(/\s{2,}/g,' ').trim()
-      const tagsArr = Array.from(foundTags).slice(0,8)
-      text = cleanBody + (tagsArr.length ? (' ' + tagsArr.join(' ')) : '')
 
       // Paragraphing: split by sentence-ending punctuation; produce smaller paragraphs (1 sentence each preferably)
       const sentenceRe = /[^。！？.!?]+[。！？.!?]?/g
@@ -1146,7 +1148,14 @@ Do not restrict length — let the model decide. Each generation MUST be differe
                           // after copying navigate to publish for first selected platform
                           const first = selected[0] || (platforms[0] && platforms[0].id)
                           if (first) {
-                            setTimeout(() => navigate(`/t/${token}/publish/${first}`, { state: { title: aiTitle, body: aiResult, photo: photoUrl, photos } }), 350)
+                            const cleanedBody = ensureEmojiTagAndFormat(aiResult || '', aiTitle || '', first)
+                            let finalTitle = aiTitle || ''
+                            if (!finalTitle) {
+                              const firstLine = (cleanedBody.split(/\r?\n/)[0] || '').trim()
+                              finalTitle = firstLine
+                            }
+                            if (finalTitle && finalTitle.length > 20) finalTitle = finalTitle.slice(0,20) + '…'
+                            setTimeout(() => navigate(`/t/${token}/publish/${first}`, { state: { title: finalTitle, body: cleanedBody, photo: photoUrl, photos } }), 350)
                           }
                         } catch (e) {
                           message.error(t('copy_failed'))
