@@ -676,7 +676,7 @@ Do not restrict length — let the model choose. Each generation MUST be differe
         let userMsg
         if (platformId === 'google') {
           // force English user message for Google
-          userMsg = platformTemplates.google.en + ' Respond in English.'
+          userMsg = 'Write a short, factual Google Maps review in English. Use 1-3 short sentences. Do NOT include emojis or hashtags. Keep it concise and objective.'
         } else if (platformId === 'xiaohongshu') {
           // Xiaohongshu: strongly request TITLE + BODY with emojis and casual voice.
           // Force examples and explicit emoji counts to encourage emoji usage.
@@ -700,7 +700,25 @@ Do not restrict length — let the model decide. Each generation MUST be differe
 
           userMsg = isZh ? promptXhsZh : promptXhsEn
         } else {
-          userMsg = isZh ? `${userText} 角色：${persona}。长度：${lengthChoice}。请保持真实、不要杜撰菜品。` : `${userText} Persona: ${persona}. Length: ${lengthChoice}. Keep it truthful and do not invent dishes.`
+          if (platformId === 'facebook') {
+            // Facebook: pick one of three casual styles
+            const fbStylesEn = [
+              `Caption: Finally a decent spot right by campus! Tried Mahjong today—I'm usually picky about Asian food here but this hit the spot. Short paragraphs, casual tone. No emojis required.`,
+              `Caption: Solid 5 stars for Mahjong. It's right next to JHU and great for quick meals. Brief, local-neighbor tone, simple sentences.`,
+              `Caption: Best new bowl spot in Baltimore! Honest short review, practical and direct.`
+            ]
+            const fbStylesZh = [
+              `标题式：终于在校园旁发现一家靠谱的店！随手写的随性点评，口语化，不用太正式。`,
+              `邻里口吻：评分简单直接，强调效率与性价比，适合忙碌的上班/学生。`,
+              `短评式：一句话直观推荐，真实随意，像是临时写的。`
+            ]
+            const pick = Math.floor(Math.random() * (isZh ? fbStylesZh.length : fbStylesEn.length))
+            userMsg = isZh ? fbStylesZh[pick] : fbStylesEn[pick]
+          } else if (platformId === 'instagram') {
+            userMsg = isZh ? `${userText} 角色：${persona}。短句、视觉化，有少量 emoji 和一个 hashtag。` : `${userText} Persona: ${persona}. Instagram-style caption: concise, visual, light emoji, one hashtag.`
+          } else {
+            userMsg = isZh ? `${userText} 角色：${persona}。长度：${lengthChoice}。请保持真实、不要杜撰菜品。` : `${userText} Persona: ${persona}. Length: ${lengthChoice}. Keep it truthful and do not invent dishes.`
+          }
         }
         return [system, { role: 'user', content: userMsg }]
       }
