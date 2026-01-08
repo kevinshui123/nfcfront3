@@ -1,4 +1,4 @@
-// BUILD_TAG 2026-01-08T06:59:20.945Z\nimport React, { useEffect } from 'react'
+const __BUILD_TAG = 'deployed-1767855709688';\nimport React, { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
