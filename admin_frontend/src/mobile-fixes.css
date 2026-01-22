@@ -1,0 +1,124 @@
+/* Mobile stacking and CTA visibility fixes */
+@media (max-width: 520px) {
+  .nfc-hero .step-actions {
+    flex-direction: column !important;
+    gap: 10px !important;
+    align-items: stretch !important;
+    margin-top: 8px !important;
+  }
+  /* Keep the generate .neon-btn compact (inline), but allow primary/full CTAs to be full-width */
+  .nfc-hero .neon-btn {
+    width: 100% !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    padding: 12px 18px !important;
+  }
+  /* Styles for Xiaohongshu style selector row: wrap and limit button sizes */
+  .xhs-style-row { display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; }
+  .xhs-style-row .ant-btn { min-width: 84px !important; padding: 6px 10px !important; }
+/* Photo control sizing and take-photo highlight */
+.photo-controls .ui-btn, .photo-controls .neon-btn { min-width: 96px !important; padding: 8px 12px !important; font-size: 14px !important; }
+.photo-controls.has-next .ui-btn, .photo-controls.has-next .neon-btn { min-width: 88px !important; padding: 6px 10px !important; }
+.photo-count { color: var(--muted); font-size: 13px; }
+.take-photo-btn { position: relative; }
+/* simple pink button style that matches site */
+.simple-pink {
+  background: rgba(255,59,107,0.12) !important;
+  color: white !important;
+  border: 1px solid rgba(255,59,107,0.18) !important;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12) !important;
+  transition: transform 140ms ease, box-shadow 140ms ease;
+  opacity: 0.7 !important;
+}
+.simple-pink:hover { transform: translateY(-2px) !important; box-shadow: 0 10px 20px rgba(0,0,0,0.12) !important; }
+
+/* ensure take-photo button centers label vertically */
+.take-photo-btn { height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0 18px !important; }
+.take-photo-btn .btn-label { line-height: normal !important; vertical-align: middle !important; display: inline-block !important; }
+.take-photo-btn span:not(.btn-label) { display: none !important; } /* hide decorative neon spans but keep label visible */
+.take-photo-btn { position: relative !important; }
+.take-photo-btn .btn-label { position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; z-index: 12 !important; animation: none !important; display: inline-block !important; margin: 0 !important; }
+.take-photo-btn, .take-photo-btn * { transform: none !important; transition: none !important; }
+.take-photo-btn:active, .take-photo-btn:focus, .take-photo-btn:hover { transform: none !important; }
+.take-photo-btn { box-shadow: none !important; border: 1px solid rgba(255,255,255,0.04) !important; background: rgba(255,59,107,0.12) !important; }
+/* dev-marker removed */
+/* ensure button label is static (no sliding) */
+.neon-btn .btn-label { position: relative; z-index: 2; display: inline-block; animation: none !important; transform: none !important; }
+
+/* photo count container forced above and centered */
+.photo-count-container { display:flex !important; justify-content:center !important; width:100% !important; margin-bottom:8px !important; order: -1 !important; }
+.photo-count { color: var(--muted) !important; font-size: 13px !important; }
+  .nfc-hero .ui-btn, .nfc-hero .full-cta, .publish-neon {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+    box-sizing: border-box !important;
+  }
+  /* Platform chips: center & limit width so they don't visually overflow the module */
+  .nfc-hero .platform-chip {
+    width: 220px !important;
+    max-width: 92% !important;
+    margin: 6px auto !important;
+    padding: 8px 12px !important;
+  }
+  .nfc-hero .platform-grid { display:flex; flex-direction:column; gap:8px; align-items:center; }
+/* Projector canvas background */
+#projector {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+.nfc-page > #projector { z-index: 1 !important; }
+.nfc-hero, .nfc-card { position: relative; z-index: 2; }
+
+.center-div {
+	width:580px;
+    height:374px;
+    position:absolute;
+    left:50%;
+    top:50%;
+    margin-left: -290px;
+    margin-top:  -187px;
+}
+
+#preloaderDiv
+{
+	position:absolute;
+	left:50%;
+    top:50%;
+    margin-left: -27px;
+    margin-top:  -27px;
+}
+
+#logo{
+	opacity:0;
+    filter: alpha(opacity=0);
+}
+
+#date2014
+{
+	position:absolute;
+	padding-left: 210px;
+	padding-top:15px;
+	opacity:0;
+	top:303px;
+	left:0;
+    filter: alpha(opacity=0);
+}
+  /* Stronger selected state for platform chips */
+  .nfc-hero .platform-chip.selected {
+    background: linear-gradient(90deg, rgba(255,59,107,0.12), rgba(30,144,255,0.04)) !important;
+    border: 1px solid rgba(255,59,107,0.30) !important;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.32), 0 0 0 4px rgba(255,59,107,0.04) !important;
+    transform: translateY(-2px) !important;
+  }
+  .nfc-hero .platform-chip .chip-label { color: var(--muted) !important; transition: color .18s ease, font-weight .18s ease; }
+  .nfc-hero .platform-chip.selected .chip-label { color: #ffffff !important; font-weight: 600 !important; }
+  .nfc-hero .platform-chip .chip-icon { opacity: 0.9; transition: filter .18s ease, opacity .18s ease; }
+  .nfc-hero .platform-chip.selected .chip-icon { filter: drop-shadow(0 6px 12px rgba(255,59,107,0.12)); opacity: 1 !important; }
+}
+
+

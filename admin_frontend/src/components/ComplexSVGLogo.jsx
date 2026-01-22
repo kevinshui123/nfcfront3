@@ -9,7 +9,7 @@ function loadAnime(cb) {
   document.head.appendChild(s)
 }
 
-export default function ComplexSVGLogo({ text = 'AI Generated', startDelay = 3 }) {
+export default function ComplexSVGLogo({ text = 'AI Generated', startDelay = 3, animated = true }) {
   // use provided text prop, default to 'AI Generated'
   // startDelay allows callers to control when chars begin animating (seconds)
   const chars = Array.from(text)
@@ -17,6 +17,13 @@ export default function ComplexSVGLogo({ text = 'AI Generated', startDelay = 3 }
   // compute per-char delay: start after startDelay, stagger each char (startDelay + index/6 s)
   const spans = chars.map((ch, i) => {
     const delay = startDelay + (i / 6)
+    if (!animated) {
+      return (
+        <span key={i} className="smoky-char static">
+          {ch === ' ' ? '\u00A0' : ch}
+        </span>
+      )
+    }
     return (
       <span
         key={i}

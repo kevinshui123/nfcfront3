@@ -45,6 +45,7 @@ export default function TokenView() {
   const threeCanvasRef = useRef(null)
   const [savedId, setSavedId] = useState(null)
   const [publishResult, setPublishResult] = useState(null)
+  const [generatedDone, setGeneratedDone] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -223,12 +224,191 @@ export default function TokenView() {
     }
   }, [])
 
+  // Particle projector background (createjs + TweenMax)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    let engine = null
+    const loadScript = (src) => new Promise((res, rej) => {
+      if (Array.from(document.scripts).some(s => s.src && s.src.indexOf(src.split('/').pop()) !== -1)) return res()
+      const s = document.createElement('script')
+      s.src = src
+      s.onload = () => res()
+      s.onerror = rej
+      document.body.appendChild(s)
+    })
+
+    const initParticles = async () => {
+      try {
+        // load createjs and TweenMax (legacy) from CDN
+        await loadScript('https://code.createjs.com/1.0.0/createjs.min.js')
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js')
+        try { console.debug('particle scripts loaded', !!window.createjs, !!window.TweenMax) } catch(e){}
+
+        // Define ParticleEngine (adapted from provided snippet)
+        (function() {
+          function ParticleEngine(canvas_id) {
+            if (!(this instanceof ParticleEngine)) return new ParticleEngine(canvas_id)
+            var _ParticleEngine = this
+            var blurFilter;
+            this.canvas_id = canvas_id
+            this.stage = new createjs.Stage(canvas_id)
+            this.totalWidth = this.canvasWidth = document.getElementById(canvas_id).width = document.getElementById(canvas_id).offsetWidth
+            this.totalHeight = this.canvasHeight = document.getElementById(canvas_id).height = document.getElementById(canvas_id).offsetHeight
+            this.compositeStyle = "lighter"
+            this.particleSettings = [{id:"small", num:300, fromX:0, toX:this.totalWidth, ballwidth:3, alphamax:0.4, areaHeight:.5, color:"#0cdbf3", fill:false},
+                                     {id:"medium", num:100, fromX:0, toX:this.totalWidth,  ballwidth:8, alphamax:0.3, areaHeight:1, color:"#6fd2f3", fill:true},
+                                     {id:"large", num:10, fromX:0, toX:this.totalWidth, ballwidth:30,  alphamax:0.2, areaHeight:1, color:"#93e9f3", fill:true}]
+            this.particleArray = []
+            this.lights = [{ellipseWidth:400, ellipseHeight:100, alpha:0.6, offsetX:0, offsetY:0, color:"#6ac6e8"},
+                           {ellipseWidth:350, ellipseHeight:250, alpha:0.3, offsetX:-50, offsetY:0, color:"#54d5e8"},
+                           {ellipseWidth:100, ellipseHeight:80, alpha:0.2, offsetX:80, offsetY:-50, color:"#2ae8d8"}]
+            this.stage.compositeOperation = _ParticleEngine.compositeStyle
+
+            function range(min, max) { return min + (max - min) * Math.random(); }
+            function round(num, precision) { var decimal = Math.pow(10, precision); return Math.round(decimal* num) / decimal; }
+            function weightedRange(to, from, decimalPlaces, weightedRangeArray, weightStrength) {
+              if (typeof from === "undefined" || from === null) from = 0
+              if (typeof decimalPlaces === "undefined" || decimalPlaces === null) decimalPlaces = 0
+              if (typeof weightedRangeArray === "undefined" || weightedRangeArray === null) weightedRangeArray = 0
+              if (typeof weightStrength === "undefined" || weightStrength === null) weightStrength = 0
+              var ret
+              if (to == from) return to
+              if (weightedRangeArray && Math.random()<=weightStrength) {
+                ret = round( Math.random()*(weightedRangeArray[1]-weightedRangeArray[0]) + weightedRangeArray[0], decimalPlaces )
+              } else {
+                ret = round( Math.random()*(to-from)+from, decimalPlaces )
+              }
+              return ret
+            }
+
+            function drawBgLight() {
+              var light, bounds, blurFilter
+              for (var i = 0, len = _ParticleEngine.lights.length; i < len; i++) {
+                light = new createjs.Shape()
+                light.graphics.beginFill(_ParticleEngine.lights[i].color).drawEllipse(0,0,_ParticleEngine.lights[i].ellipseWidth,_ParticleEngine.lights[i].ellipseHeight)
+                light.regX = _ParticleEngine.lights[i].ellipseWidth/2
+                light.regY = _ParticleEngine.lights[i].ellipseHeight/2
+                light.y = light.initY = _ParticleEngine.totalHeight/2 + _ParticleEngine.lights[i].offsetY
+                light.x = light.initX = _ParticleEngine.totalWidth/2 + _ParticleEngine.lights[i].offsetX
+                blurFilter = new createjs.BlurFilter(_ParticleEngine.lights[i].ellipseWidth, _ParticleEngine.lights[i].ellipseHeight, 1)
+                bounds = blurFilter.getBounds()
+                light.filters = [blurFilter]
+                light.cache(bounds.x-_ParticleEngine.lights[i].ellipseWidth/2, bounds.y-_ParticleEngine.lights[i].ellipseHeight/2, bounds.width*2, bounds.height*2)
+                light.alpha = _ParticleEngine.lights[i].alpha
+                light.compositeOperation = "screen"
+                _ParticleEngine.stage.addChildAt(light, 0)
+                _ParticleEngine.lights[i].elem = light
+              }
+              TweenMax.fromTo(_ParticleEngine.lights[0].elem, 10, {scaleX:1.5, x:_ParticleEngine.lights[0].elem.initX, y:_ParticleEngine.lights[0].elem.initY},{yoyo:true, repeat:-1, ease:Power1.easeInOut, scaleX:2, scaleY:0.7});
+              TweenMax.fromTo(_ParticleEngine.lights[1].elem, 12, { x:_ParticleEngine.lights[1].elem.initX, y:_ParticleEngine.lights[1].elem.initY},{delay:5, yoyo:true, repeat:-1, ease:Power1.easeInOut, scaleY:2, scaleX:2, y:_ParticleEngine.totalHeight/2-50, x:_ParticleEngine.totalWidth/2+100});
+              TweenMax.fromTo(_ParticleEngine.lights[2].elem, 8, { x:_ParticleEngine.lights[2].elem.initX, y:_ParticleEngine.lights[2].elem.initY},{delay:2, yoyo:true, repeat:-1, ease:Power1.easeInOut, scaleY:1.5, scaleX:1.5, y:_ParticleEngine.totalHeight/2, x:_ParticleEngine.totalWidth/2-200});
+            }
+
+            function animateBall(ball) {
+              var scale = range(0.3, 1)
+              var xpos = range(ball.initX - ball.distance, ball.initX + ball.distance)
+              var ypos = range(ball.initY - ball.distance, ball.initY + ball.distance)
+              var speed = ball.speed
+              TweenMax.to(ball, speed, {scaleX:scale, scaleY:scale, x:xpos, y:ypos, onComplete:animateBall, onCompleteParams:[ball], ease:Cubic.easeInOut})
+              TweenMax.to(ball, speed/2, {alpha:range(0.1, ball.alphaMax), onComplete:fadeout, onCompleteParams:[ball, speed]})
+            }
+            function fadeout(ball, speed) { ball.speed = range(2, 10); TweenMax.to(ball, speed/2, {alpha:0}); }
+
+            function drawParticles() {
+              for (var i = 0, len = _ParticleEngine.particleSettings.length; i < len; i++) {
+                var ball = _ParticleEngine.particleSettings[i]
+                var circle
+                for (var s = 0; s < ball.num; s++ ) {
+                  circle = new createjs.Shape()
+                  if (ball.fill) {
+                    circle.graphics.beginFill(ball.color).drawCircle(0, 0, ball.ballwidth)
+                    blurFilter = new createjs.BlurFilter(ball.ballwidth/2, ball.ballwidth/2, 1)
+                    circle.filters = [blurFilter]
+                    var bounds = blurFilter.getBounds()
+                    circle.cache(-50+bounds.x, -50+bounds.y, 100+bounds.width, 100+bounds.height)
+                  } else {
+                    circle.graphics.beginStroke(ball.color).setStrokeStyle(1).drawCircle(0,0,ball.ballwidth)
+                  }
+                  circle.alpha = range(0, 0.1)
+                  circle.alphaMax = ball.alphamax
+                  circle.distance = ball.ballwidth * 2
+                  circle.ballwidth = ball.ballwidth
+                  circle.flag = ball.id
+                  _ParticleEngine.applySettings(circle, ball.fromX, ball.toX, ball.areaHeight)
+                  circle.speed = range(2, 10)
+                  circle.y = circle.initY
+                  circle.x = circle.initX
+                  circle.scaleX = circle.scaleY = range(0.3, 1)
+                  _ParticleEngine.stage.addChild(circle)
+                  animateBall(circle)
+                  _ParticleEngine.particleArray.push(circle)
+                }
+              }
+            }
+
+            this.applySettings = function(circle, positionX, totalWidth, areaHeight) {
+              circle.speed = range(1, 3)
+              circle.initY = weightedRange(0, _ParticleEngine.totalHeight , 1, [_ParticleEngine.totalHeight * (2-areaHeight/2)/4, _ParticleEngine.totalHeight*(2+areaHeight/2)/4], 0.8 )
+              circle.initX = weightedRange(positionX, totalWidth, 1, [positionX+ ((totalWidth-positionX))/4, positionX+ ((totalWidth-positionX)) * 3/4], 0.6)
+            }
+
+            drawBgLight()
+            drawParticles()
+          }
+          ParticleEngine.prototype.render = function() { this.stage.update() }
+          ParticleEngine.prototype.resize = function() {
+            this.totalWidth = this.canvasWidth = document.getElementById(this.canvas_id).width = document.getElementById(this.canvas_id).offsetWidth
+            this.totalHeight = this.canvasHeight = document.getElementById(this.canvas_id).height = document.getElementById(this.canvas_id).offsetHeight
+            this.render()
+            for (var i= 0, length = this.particleArray.length; i < length; i++) {
+              this.applySettings(this.particleArray[i], 0, this.totalWidth, this.particleArray[i].areaHeight)
+            }
+            for (var j = 0, len = this.lights.length; j < len; j++) {
+              this.lights[j].elem.initY = this.totalHeight/2 + this.lights[j].offsetY
+              this.lights[j].elem.initX = this.totalWidth/2 + this.lights[j].offsetX
+              TweenMax.to(this.lights[j].elem, .5, {x:this.lights[j].elem.initX, y:this.lights[j].elem.initY})
+            }
+          }
+          window.ParticleEngine = ParticleEngine
+        })()
+
+        // instantiate
+        try {
+          if (document.getElementById('projector')) {
+            engine = new window.ParticleEngine('projector')
+            createjs.Ticker.addEventListener("tick", function(){ if (engine) engine.render() })
+            window.addEventListener('resize', function(){ try { engine.resize() } catch(e){} }, false)
+            window.__particleEngineInstance = engine
+          }
+        } catch (e) { console.warn('particle init failed', e) }
+      } catch (e) { console.warn('load particle scripts failed', e) }
+    }
+    initParticles()
+    return () => {
+      try { if (window.__particleEngineInstance) { delete window.__particleEngineInstance } } catch(e){}
+    }
+  }, [])
+
   // Post-process AI body: remove duplicate title, ensure emoji/tag presence, and format into paragraphs.
   // This will minimally inject one emoji or a #JHU tag if missing, but will not rewrite content.
-  const ensureEmojiTagAndFormat = (raw, providedTitle) => {
+  const ensureEmojiTagAndFormat = (raw, providedTitle, platform = 'xiaohongshu') => {
     try {
       let text = (raw || '').trim()
       if (!text) return text
+
+      // If platform is Google, do not inject emojis or tags — return cleaned paragraphed text.
+      if (platform === 'google') {
+        // remove any emoji characters and hashtags
+        text = text.replace(/[\p{Emoji}\u{2600}-\u{27BF}]/gu, '').replace(/#([^\s#，。,。!！?？]+)/g, '').trim()
+        // paragraphing: split by sentence-ending punctuation
+        const sentenceRe = /[^。！？.!?]+[。！？.!?]?/g
+        let parts = text.match(sentenceRe)
+        if (!parts || parts.length === 0) {
+          parts = text.match(/.{1,60}(?:\s|$)/g) || [text]
+        }
+        const paras = parts.map(p => p.trim()).filter(Boolean)
+        return paras.join('\n\n').trim()
+      }
 
       // Remove leading explicit title markers like "标题:" or "TITLE:"
       text = text.replace(/^\s*(标题[:：]\s*|TITLE[:：]\s*)/i, '')
@@ -484,6 +664,11 @@ export default function TokenView() {
   // Animate platform chips entrance using anime.js when step 1 is shown
   useEffect(() => {
     if (typeof window === 'undefined' || !window.anime) return
+    // If the heading was rendered as the static variant (no smoky animation),
+    // skip the entrance animation for chips to keep the UI calm.
+    try {
+      if (document.querySelector('.smoky-char.static')) return
+    } catch(e) {}
     if (step === 1) {
       try {
         const chips = Array.from(document.querySelectorAll('.platform-chip'))
@@ -572,8 +757,24 @@ export default function TokenView() {
       webFallback: 'https://www.instagram.com'
     },
   ]
+  
 
-  const onAi = async () => {
+  const navigateToPublish = (platformId, cleanedBody, providedTitle) => {
+    try {
+      const first = platformId || (platforms[0] && platforms[0].id)
+      let finalTitle = providedTitle || aiTitle || ''
+      if (!finalTitle) {
+        const firstLine = (cleanedBody.split(/\r?\n/)[0] || '').trim()
+        finalTitle = firstLine
+      }
+      if (finalTitle && finalTitle.length > 20) finalTitle = finalTitle.slice(0,20) + '…'
+      const placeUrlForNav = (content && (content.place_url || content.placeUrl)) || (token === 'demo-token' ? 'https://www.google.com/maps/place/Mahjong+mini+bowl/@39.3260566,-76.6182165,16z/data=!3m1!4b1!4m6!3m5!1s0x89c8051c495172d9:0xbce0d798d2765508!8m2!3d39.3260566!4d-76.6156362!16s%2Fg%2F11mrdpwh10?entry=ttu&g_ep=EgoyMDI2MDEwNi4wIKXMDSoKLDEwMDc5MjA2OUgBUAM%3D' : null)
+      const placeIdForNav = (content && (content.place_id || content.placeId)) || (token === 'demo-token' ? 'ChIJ2XJRSRwFyIkRCFV20pjX4Lw' : null)
+      navigate(`/t/${token}/publish/${first}`, { state: { title: finalTitle, body: cleanedBody, photo: photoUrl, photos, placeUrl: placeUrlForNav, placeId: placeIdForNav } })
+    } catch (e) { console.error(e) }
+  }
+
+  const onAi = async (autoNavigate = false) => {
     // Use Silra chat completions API to generate the review.
     // This function builds platform-specific prompts and calls the endpoint.
     const MIN_VISIBLE_MS = 900
@@ -612,12 +813,29 @@ export default function TokenView() {
         }
       }
 
-      const buildMessages = (platformId, language, userPrompt, photo) => {
+      const buildMessages = (platformId, language, userPrompt, photo, variant = 'default') => {
         // restaurant brief and layout info for context
-        const briefEN = 'Mahjong is a small-bowl restaurant. Near the entrance on the right is a milk-tea counter; further ahead is the food serving counter where staff serve small bowls. Only state facts; do not invent dishes.'
-        const briefZH = 'Mahjong 为小碗菜餐馆。门口右侧为奶茶柜台，前方是打饭台，顾客按点单由前台打成小碗上菜。仅陈述事实，不要杜撰菜品。'
+      // brief templates; may be overridden by variant below
+      const briefEN = 'This is a small-bowl restaurant. Near the entrance on the right is a milk-tea counter; further ahead is the food serving counter where staff serve small bowls. Only state facts; do not invent dishes.'
+      const briefZH = '这是一家小碗菜餐馆。门口右侧为奶茶柜台，前方是打饭台，顾客按点单由前台打成小碗上菜。仅陈述事实，不要杜撰菜品。'
+
+      // variant-specific overrides
+      const placeName = (variant === 'lantern') ? 'Lantern' : 'Mahjong'
+      const variantLocationEN = (variant === 'lantern')
+        ? 'The place "Lantern" is located in Arlington, very close to the JHU DC campus; the area is frequented by students.'
+        : 'Mahjong is a small-bowl restaurant near JHU and student neighborhoods.'
+      const variantLocationZH = (variant === 'lantern')
+        ? '“Lantern” 位于 Arlington，靠近 JHU DC 校区，周边多为学生。'
+        : 'Mahjong 位于靠近 JHU 的学生区。'
 
         const isZh = (language && (String(language).toLowerCase().includes('zh') || language === 'Chinese'))
+        // If target is Google, ignore any photo and force a place-specific review for Mahjong mini bowl.
+        if (platformId === 'google') {
+          const personas = ['a satisfied customer', 'a student', 'a working professional', 'a foodie', 'a regular']
+          const persona = personas[Math.floor(Math.random() * personas.length)]
+          const googleInstruction = `Write a Google Maps style review in English for the place "${placeName}". Do NOT include emojis or hashtags. Persona: ${persona}. Length: 1-3 short sentences. Make each generation different in voice and wording. Do not reference the uploaded photo. Output only the review text.`
+          return [ { role: 'system', content: googleInstruction }, { role: 'user', content: googleInstruction } ]
+        }
         // Force Google reviews to be in English regardless of selected UI language
         const langDirective = platformId === 'google' ? 'Respond in English.' : (isZh ? '请用中文回复。' : 'Respond in English.')
 
@@ -627,7 +845,7 @@ export default function TokenView() {
 
         const system = {
           role: 'system',
-          content: `${platformPreamble} ${langDirective} ${isZh ? briefZH : briefEN}`
+          content: `${platformPreamble} ${langDirective} ${isZh ? (variantLocationZH || briefZH) : (variantLocationEN || briefEN)}`
         }
 
         // enhanced personas and length variability for stronger diversity
@@ -648,7 +866,7 @@ export default function TokenView() {
 
         // attach only first photo to reduce payload; instruct model to use visible info only
         const photoToUse = Array.isArray(photo) ? photo[0] : photo
-        if (photoToUse) {
+          if (photoToUse) {
           const baseInstruction = isZh
             ? `角色：${persona}。长度：${lengthChoice}。请仅使用图片和上述信息中可见的菜名与事实，保持真实、避免夸张。`
             : `Persona: ${persona}. Length: ${lengthChoice}. Use only visible dishes and facts from the image or brief. Keep it truthful and avoid exaggeration.`
@@ -721,9 +939,9 @@ Do not restrict length — let the model choose. Each generation MUST be differe
         return [system, { role: 'user', content: userMsg }]
       }
 
-      const platformId = (selected && selected[0]) || (platforms[0] && platforms[0].id) || 'instagram'
+        const platformId = (selected && selected[0]) || (platforms[0] && platforms[0].id) || 'instagram'
       const language = (localStorage.getItem('sz_lang') || 'en') === 'zh' ? 'Chinese' : 'English'
-      const messages = buildMessages(platformId, language, prompt || (content && content.title) || t('ai_prompt_default'), (photos && photos.length) ? photos : photoUrl)
+      const messages = buildMessages(platformId, language, prompt || (content && content.title) || t('ai_prompt_default'), (photos && photos.length) ? photos : photoUrl, 'default')
 
       // Debug: log messages payload to help diagnose language issues
       try { console.debug('AI messages payload:', JSON.parse(JSON.stringify(messages))) } catch(e) {}
@@ -748,7 +966,9 @@ Do not restrict length — let the model choose. Each generation MUST be differe
       if (!resp.ok) {
         const txt = await resp.text().catch(()=>null)
         console.error('Silra error', resp.status, txt)
-        message.error(`${t('ai_failed')}: ${resp.status}`)
+        const detail = txt ? ` (${String(txt).slice(0,200)})` : ''
+        message.error(`${t('ai_failed')}: ${resp.status}${detail}`)
+        try { setGeneratedDone(false) } catch(e){}
         setAiLoading(false)
         return
       }
@@ -840,6 +1060,16 @@ Do not restrict length — let the model choose. Each generation MUST be differe
           }
         } catch (e) {}
         message.success(t('ai_generated'))
+        try { setGeneratedDone(true) } catch(e){}
+        if (autoNavigate) {
+          try {
+            const cleanedFinal = ensureEmojiTagAndFormat(txt || '', null, platformId)
+            // delay slightly to ensure UI state settled, then navigate
+            setTimeout(() => {
+              try { navigateToPublish(platformId, cleanedFinal, null) } catch(e){ console.error(e) }
+            }, 250)
+          } catch (e) {}
+        }
       } else {
         // fallback to full json
         const data = await resp.json()
@@ -892,10 +1122,22 @@ Do not restrict length — let the model choose. Each generation MUST be differe
           }
         } catch(e){ applyPostProcessing(text, null, platformId) }
         message.success(t('ai_generated'))
+        try { setGeneratedDone(true) } catch(e){}
+        if (autoNavigate) {
+          try {
+            const cleanedFinal = ensureEmojiTagAndFormat(text || '', null, platformId)
+            setTimeout(() => {
+              try { navigateToPublish(platformId, cleanedFinal, null) } catch(e){ console.error(e) }
+            }, 250)
+          } catch (e) {}
+        }
       }
     } catch (e) {
-      console.error(e)
-      message.error(t('ai_failed'))
+      console.error('AI generation error', e)
+      const msg = (e && e.message) ? e.message : String(e)
+      try { setAiResult('') } catch(e){}
+      try { setGeneratedDone(false) } catch(e){}
+      message.error(`${t('ai_failed')}: ${msg}`)
     } finally {
       setAiLoading(false)
     }
@@ -920,6 +1162,21 @@ Do not restrict length — let the model choose. Each generation MUST be differe
     }
     return () => { if (iv) clearInterval(iv) }
   }, [aiLoading])
+
+  useEffect(() => {
+    if (step !== 2) setGeneratedDone(false)
+  }, [step])
+
+  // Auto-start AI when entering step 2 (AI generate) if not already started/completed
+  useEffect(() => {
+    if (step === 2 && !aiLoading && !generatedDone) {
+      // small delay to ensure UI settled
+      const id = setTimeout(() => {
+        try { onAi(false).catch(()=>{}) } catch(e){}
+      }, 150)
+      return () => clearTimeout(id)
+    }
+  }, [step, aiLoading, generatedDone])
 
   const navigate = useNavigate()
 
@@ -960,6 +1217,7 @@ Do not restrict length — let the model choose. Each generation MUST be differe
 
   return (
     <div className="nfc-page" style={{ padding: 12 }}>
+      <canvas id="projector">Your browser does not support the Canvas element.</canvas>
       {!(step === 1 && needLangSelect) && <TopControls />}
       <PrismHeader />
       <div className="nfc-hero" style={{ marginBottom: 12 }}>
@@ -973,9 +1231,9 @@ Do not restrict length — let the model choose. Each generation MUST be differe
                 {step === 0 ? (
                   <ComplexSVGLogo text={'Take Photo'} startDelay={1} />
                 ) : step === 1 && !needLangSelect ? (
-                  <ComplexSVGLogo text={'Choose Platform'} startDelay={1} />
+                  <ComplexSVGLogo text={'Choose Platform'} startDelay={1} animated={false} />
                 ) : step === 2 ? (
-                  <ComplexSVGLogo text={t('ai_generated')} startDelay={3} />
+                  <ComplexSVGLogo text={t('ai_generated')} startDelay={3} animated={false} />
                 ) : (
                   <h2 style={{ marginBottom: 6 }}>{content?.shop?.name || t('welcome')}</h2>
                 )}
@@ -1006,63 +1264,7 @@ Do not restrict length — let the model choose. Each generation MUST be differe
                 )}
               </div>
 
-              {/* Step 0: Take Photo */}
-              {step === 0 && (
-                <div className="step step-0" style={{ marginTop: 8 }}>
-                  <div style={{ padding: 12, background: 'rgba(255,255,255,0.02)', borderRadius: 8, minHeight: 140, color: 'var(--text)' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', justifyContent: 'center' }}>
-                      <p style={{ margin: 0, opacity: 0.9 }}>{t('take_photo_prompt')}</p>
-                    </div>
-                  </div>
-                  <div style={{ marginTop: 18, display: 'flex', justifyContent: 'center' }}>
-                    {/* Hidden file input to trigger camera on mobile */}
-                    <input id="take-photo-input" type="file" accept="image/*" capture="environment" style={{ display: 'none' }}
-                      onChange={async (e) => {
-                        const f = e.target.files && e.target.files[0]
-                        if (!f) return
-                        const reader = new FileReader()
-                        reader.onload = () => {
-                          try {
-                            const data = reader.result
-                        setPhotos(prev => {
-                              const next = [...(prev||[]), data].slice(0,9) // allow up to 9 photos
-                              // update primary preview photo
-                              if (next.length > 0) setPhotoUrl(next[0])
-                              // do not auto-advance — user can take any number then press Generate
-                              if (next.length === 0) {
-                                message.info(t('photos_needed_notify') || `Please take at least one photo`)
-                              }
-                              return next
-                            })
-                          } catch(e) {}
-                        }
-                        reader.readAsDataURL(f)
-                      }}
-                    />
-                    <a
-                      role="button"
-                      className="neon-btn"
-                      onClick={() => {
-                        const inp = document.getElementById('take-photo-input')
-                        if (inp) inp.click()
-                      }}
-                    >
-                      <span></span><span></span><span></span><span></span>
-                      {t('take_photo_btn')}
-                    </a>
-                    <div style={{ marginLeft: 12, display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
-                      <div style={{ color: 'var(--muted)', fontSize: 13 }}>{t('photos_needed_label') || 'Photos' }: {photos.length}</div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: 160 }}>
-                        <Button className="ui-btn" onClick={() => setStep(1)}>{t('previous_step')}</Button>
-                        <Button className="ui-btn" onClick={() => {
-                          if (!photos || photos.length === 0) { message.info(t('photos_needed_notify') || 'Please take at least one photo'); return }
-                          setStep(2)
-                        }}>{t('next_step')}</Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* Step 0 (Take Photo) removed — flow now goes platform (1) -> AI generate (2) */}
 
               {/* Step 1: choose platform */}
               {step === 1 && (
@@ -1100,10 +1302,13 @@ Do not restrict length — let the model choose. Each generation MUST be differe
                       <div className="platform-grid" role="list" style={{ marginTop: 8 }}>
                         {platforms.map(p => {
                           const active = selected.includes(p.id)
-                          return (
+                            return (
                             <div key={p.id} role="listitem" onClick={() => {
-                              setSelected(active ? selected.filter(s=>s!==p.id) : [...selected, p.id])
-                            }} className={`platform-chip ${active ? 'selected' : ''}`} aria-pressed={active} style={{ width: 200, padding: '8px 10px', margin: '6px auto' }}>
+                              // Select this platform exclusively and jump to AI generate step (skip photo).
+                              setSelected([p.id])
+                              setStep(2)
+                              // AI auto-start is handled by useEffect when entering step 2
+                            }} className={`platform-chip ${active ? 'selected' : ''}`} aria-pressed={active} style={{ width: '100%', maxWidth: 220, padding: '8px 10px', margin: '6px auto' }}>
                               <div className="chip-inner" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                                 <span className="chip-icon" aria-hidden>{p.icon}</span>
                                 <span className="chip-label" style={{ fontSize: 14 }}>{p.label}</span>
@@ -1114,7 +1319,7 @@ Do not restrict length — let the model choose. Each generation MUST be differe
                       </div>
                       {/* Xiaohongshu style selector - moved above generate button */}
                       {selected.includes('xiaohongshu') && (
-                        <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center', gap: 12 }}>
+                        <div className="xhs-style-row" style={{ marginTop: 12, display: 'flex', justifyContent: 'center', gap: 12 }}>
                           <div style={{ color: 'var(--muted)', alignSelf: 'center' }}>小红书风格:</div>
                           <div style={{ display: 'flex', gap: 8 }}>
                             <Button size="small" type={xhsStyle === 'real' ? 'primary' : 'default'} onClick={() => setXhsStyle('real')}>真实探店</Button>
@@ -1123,20 +1328,8 @@ Do not restrict length — let the model choose. Each generation MUST be differe
                           </div>
                         </div>
                       )}
-                      <div style={{ marginTop: 18, display: 'flex', justifyContent: 'center' }}>
-                        <a
-                          role="button"
-                          className="neon-btn"
-                          onClick={async () => {
-                            if (selected.length === 0) { message.info(t('please_select_platform')); return }
-                            // go to Take Photo step before AI generation
-                            setStep(0)
-                          }}
-                        >
-                          <span></span><span></span><span></span><span></span>
-                          {t('generate')}
-                        </a>
-                      </div>
+                      {/* Generate action removed — selecting a platform now enters the Take Photo flow directly */}
+                      {/* Variant selection removed — generate uses default variant */}
                     </>
                   )}
                 </div>
@@ -1166,47 +1359,22 @@ Do not restrict length — let the model choose. Each generation MUST be differe
                       ) : (
                         // placeholder prompting user to click generate
                         <div style={{ height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)' }}>
-                          {t('click_generate_review') || '点击生成评价'}
+                          {t('ai_auto_generating') || '正在为您生成评价...'}
                         </div>
                       )}
                     </>
-                    {/* Single copy button below results */}
-                    <div style={{ marginTop: 8, display: 'flex', justifyContent: 'center' }}>
-                      <Button onClick={() => {
-                        try {
-                          navigator.clipboard.writeText(aiResult || '')
-                          message.success(t('copied'))
-                          // after copying navigate to publish for first selected platform
-                          const first = selected[0] || (platforms[0] && platforms[0].id)
-                          if (first) {
-                            const cleanedBody = ensureEmojiTagAndFormat(aiResult || '', aiTitle || '', first)
-                            let finalTitle = aiTitle || ''
-                            if (!finalTitle) {
-                              const firstLine = (cleanedBody.split(/\r?\n/)[0] || '').trim()
-                              finalTitle = firstLine
-                            }
-                            if (finalTitle && finalTitle.length > 20) finalTitle = finalTitle.slice(0,20) + '…'
-                            setTimeout(() => navigate(`/t/${token}/publish/${first}`, { state: { title: finalTitle, body: cleanedBody, photo: photoUrl, photos } }), 350)
-                          }
-                        } catch (e) {
-                          message.error(t('copy_failed'))
-                        }
-                      }}>{t('copy')}</Button>
-                    </div>
+                    {/* removed manual generate button — AI auto-starts on entering this step */}
                   </div>
                             <div className="step-actions" style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center', alignItems: 'center' }}>
-                              <a
-                                role="button"
-                                className={`neon-btn ${aiLoading ? 'loading' : ''}`}
-                                onClick={async () => {
-                                  if (aiLoading) return
-                                  await onAi()
-                                }}
-                              >
-                                <span></span><span></span><span></span><span></span>
-                                {aiLoading ? t('generating') : t('generate')}
-                              </a>
-                              <Button className="ui-btn" onClick={() => setStep(0)}>{t('previous_step')}</Button>
+                              <Button className="ui-btn" onClick={() => setStep(1)}>{t('previous_step')}</Button>
+                              {generatedDone && (
+                                <Button className="ui-btn" onClick={() => {
+                                  const first = selected[0] || (platforms[0] && platforms[0].id)
+                                  if (!first) { message.info(t('no_platform_selected')); return }
+                                  const cleanedBody = ensureEmojiTagAndFormat(aiResult || '', aiTitle || '', first)
+                                  navigateToPublish(first, cleanedBody, aiTitle || '')
+                                }}>{t('next_step')}</Button>
+                              )}
                             </div>
                 </div>
               )}
@@ -1231,12 +1399,11 @@ Do not restrict length — let the model choose. Each generation MUST be differe
                         finalTitle = firstLine
                       }
                       if (finalTitle && finalTitle.length > 20) finalTitle = finalTitle.slice(0,20) + '…'
-                      navigate(`/t/${token}/publish/${first}`, { state: { title: finalTitle, body: cleanedBody, photo: photoUrl, photos } })
                     }} style={{ minWidth: 220 }}>{t('next_open_platform')}</Button>
                   </div>
                 </div>
               )}
-
+ 
             </>
           )}
         </Card>
@@ -1244,5 +1411,4 @@ Do not restrict length — let the model choose. Each generation MUST be differe
     </div>
   )
 }
-
-
+ 

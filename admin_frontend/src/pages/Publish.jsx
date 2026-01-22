@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import PrismHeader from '../components/PrismHeader'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Card, Button, Image, Space, message } from 'antd'
+import { getTokenContent } from '../api'
 
 const platformMeta = {
   xiaohongshu: { label: '小红书', deepLink: 'xiaohongshu://post', webFallback: 'https://www.xiaohongshu.com', color: '#ff3b6b' },
@@ -17,9 +18,26 @@ export default function PublishPage() {
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [photo, setPhoto] = useState(null)
+  const [placeUrl, setPlaceUrl] = useState('')
+  const [placeId, setPlaceId] = useState('')
   const meta = platformMeta[platform] || { label: platform, deepLink: '', color: '#1890ff' }
 
   const openDeepLink = () => {
+    // Special-case Google: prefer opening the "write review" page via place_id if available,
+    // otherwise fall back to a provided placeUrl or the generic web fallback.
+    if (platform === 'google') {
+      if (placeId) {
+        const writeReviewUrl = `https://search.google.com/local/writereview?placeid=${encodeURIComponent(placeId)}`
+        window.open(writeReviewUrl, '_blank')
+        return
+      }
+      if (placeUrl) {
+        window.open(placeUrl, '_blank')
+        return
+      }
+      // otherwise fall through to generic fallback below
+    }
+
     const fallbackUrl = meta.webFallback || '/'
     if (meta.deepLink) {
       // Use iframe technique for some mobile browsers, then fallback
@@ -53,6 +71,19 @@ export default function PublishPage() {
       if (st.title) setTitle(st.title)
       if (st.body) setBody(st.body)
       if (st.photo) setPhoto(st.photo)
+      if (st.placeId || st.place_id) setPlaceId(st.placeId || st.place_id)
+      // If navigation state not provided (direct open), fetch token content from backend
+      if (!st.title && !st.body && token) {
+        getTokenContent(token).then(d => {
+          try {
+            if (!st.title && d && d.title) setTitle(d.title)
+            if (!st.body && d && d.body) setBody(d.body)
+            if (!st.photo && d && d.photo) setPhoto(d.photo)
+            if (!st.placeUrl && d && (d.place_url || d.placeUrl)) setPlaceUrl(d.place_url || d.placeUrl)
+            if (!st.placeId && d && (d.place_id || d.placeId)) setPlaceId(d.place_id || d.placeId)
+          } catch (e) {}
+        }).catch(()=>{})
+      }
     } catch (e) {}
   }, [location])
 
@@ -91,13 +122,45 @@ export default function PublishPage() {
   }
 
   const copyAndOpen = async () => {
+    const payload = `${title || ''}\n\n${body || ''}`
     try {
-      const payload = `${title || ''}\n\n${body || ''}`
       await navigator.clipboard.writeText(payload)
       message.success('已复制到剪贴板，准备打开应用...')
     } catch (e) {
       message.warn('复制到剪贴板失败，请手动复制')
     }
+
+    // Try Xiaohongshu URL schemes first (iOS/Android variants). If none work, fallback to openDeepLink().
+    const tryXhsSchemes = async () => {
+      const schemes = [
+        'xhsdiscover://post_note?ignore_draft=true',
+        'xhsdiscover://post',
+        'xhsdiscovery://post'
+      ]
+      // attempt each scheme using iframe technique; give browser time to switch
+      for (const s of schemes) {
+        try {
+          const iframe = document.createElement('iframe')
+          iframe.style.display = 'none'
+          iframe.src = s
+          document.body.appendChild(iframe)
+          // wait briefly to allow app to open; if it doesn't, continue to next
+          await new Promise(res => setTimeout(res, 850))
+          try { document.body.removeChild(iframe) } catch (e) {}
+        } catch (e) {
+          // ignore and try next
+        }
+      }
+      // After attempting schemes, still fallback to the web/openDeepLink (cannot reliably detect success)
+      openDeepLink()
+    }
+
+    // If platform is Xiaohongshu, try schemes; otherwise use existing fallback
+    if (meta && meta.label && meta.label.includes('小红书')) {
+      await tryXhsSchemes()
+      return
+    }
+    // default fallback for non-XHS platforms
     openDeepLink()
   }
 

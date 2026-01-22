@@ -598,66 +598,55 @@ html,body,#root{
 /* ensure card sits above 3d background */
 .nfc-hero > .ant-card, .nfc-hero .nfc-card { position: relative; z-index: 3; }
 
-/* Tubes background canvas (global) */
-.tubes-root { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-.tubes-canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+/* Background canvas removed - using new blob background */
 
-/* ensure app content sits above the tubes canvas */
-#root, html, body, .app-container { position: relative; z-index: 2; }
+/* Neural background removed - using new blob background */
 
-/* Fallback animated gradient for tubes background (visible even if CDN fails) */
-.tubes-root {
-  background: radial-gradient(800px 400px at 10% 20%, rgba(86,166,255,0.10), transparent 12%),
-              radial-gradient(800px 400px at 90% 80%, rgba(185,147,255,0.06), transparent 12%),
-              linear-gradient(180deg, rgba(6,12,22,0.95), rgba(6,12,22,0.96));
-  background-blend-mode: screen, screen, normal;
-  animation: tubesGradientMove 14s linear infinite;
-  will-change: background-position;
-}
-.tubes-canvas { background: transparent; }
-
-@keyframes tubesGradientMove {
-  0% { background-position: 0% 0%, 0% 0%, 0% 0%; }
-  50% { background-position: 40% 10%, 60% 90%, 0% 0%; }
-  100% { background-position: 0% 0%, 0% 0%, 0% 0%; }
+/* Blob background - light theme overrides for UI elements */
+.blob-background ~ * .nfc-card,
+.blob-background + * .nfc-card,
+.nfc-card {
+  background: rgba(255,255,255,0.94) !important;
+  color: #111 !important;
+  box-shadow: 0 20px 60px rgba(2,6,23,0.12) !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
 }
 
-/* neural canvas styles */
-.neural-canvas {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
-  display: block;
-  background: transparent;
+.blob-background ~ * .nfc-card .muted,
+.blob-background + * .nfc-card .muted,
+.nfc-card .muted {
+  color: rgba(0,0,0,0.55) !important;
 }
 
-/* fallback animated gradient for neural root */
-.neural-root {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: radial-gradient(800px 400px at 10% 20%, rgba(102,118,234,0.09), transparent 12%),
-              radial-gradient(800px 400px at 90% 80%, rgba(240,147,251,0.05), transparent 12%),
-              linear-gradient(180deg, rgba(6,12,22,0.96), rgba(6,12,22,0.98));
-  background-blend-mode: screen, screen, normal;
-  animation: neuralGradientMove 16s linear infinite;
+/* Make neon buttons neutral and non-animated */
+.neon-btn {
+  background: transparent !important;
+  color: #111 !important;
+  border: 1px solid rgba(0,0,0,0.08) !important;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.06) !important;
+  padding: 8px 18px !important;
+  border-radius: 8px !important;
+  transition: transform 160ms ease !important;
 }
-.neural-root::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle at 50% 10%, rgba(255,255,255,0.02), transparent 12%);
-  mix-blend-mode: overlay;
-  pointer-events: none;
+.neon-btn span { display: none !important; } /* remove decorative animated lines */
+.neon-btn:hover { transform: translateY(-3px) !important; filter: none !important; }
+
+/* Disable smoky text animation when static variant used */
+.smoky-root .smoky-char.static {
+  animation: none !important;
+  opacity: 1 !important;
+  color: #111 !important;
+  font-family: 'Ma Shan Zheng', cursive, sans-serif !important;
+  font-size: inherit !important;
 }
-@keyframes neuralGradientMove {
-  0% { background-position: 0% 0%, 0% 0%, 0% 0% }
-  50% { background-position: 30% 20%, 70% 80%, 0% 0% }
-  100% { background-position: 0% 0%, 0% 0%, 0% 0% }
+
+/* Ensure platform chips are lighter on the new background */
+.platform-chip {
+  background: rgba(255,255,255,0.9) !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  color: #111 !important;
+  box-shadow: 0 8px 28px rgba(2,6,23,0.06) !important;
 }
 
 /* logo container placed at top center, not shown on dashboard due to LogoHeader logic */
@@ -1079,6 +1068,38 @@ body:not(.is-dashboard) .shimmer {
   border-radius:8px;
 }
 
+/* --- Light-theme simplification overrides (user request) --- */
+:root:not([data-theme="dark"]) #logo .logo-text {
+  color: var(--text) !important;
+  text-shadow: none !important;
+}
+:root:not([data-theme="dark"]) .nfc-hero {
+  --main-bg: linear-gradient(180deg,#ffffff,#f7fbff) !important;
+  animation: none !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  box-shadow: 0 8px 24px rgba(2,6,23,0.06) !important;
+}
+:root:not([data-theme="dark"]) .nfc-hero::after {
+  animation: none !important;
+  background: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+:root:not([data-theme="dark"]) .ant-btn,
+:root:not([data-theme="dark"]) .glass-button {
+  color: var(--text) !important;
+  background: linear-gradient(180deg,#ffffff,#f4f6f8) !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.06) !important;
+}
+.brand-img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  border-radius:8px;
+}
+
 /* brand initials fallback */
 .brand-initials{
   width:100%;
@@ -1141,7 +1162,40 @@ body:not(.is-dashboard) .shimmer {
 /* login page top controls placement */
 .login-hero .top-controls { right: 36px; top: 18px }
 
+/* Light-theme overrides for better contrast with the blob background */
+:root:not([data-theme="dark"]) .login-hero .ant-card {
+  background: rgba(255,255,255,0.95);
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 12px 40px rgba(2,6,23,0.06);
+}
 
+:root:not([data-theme="dark"]) .ant-btn-primary {
+  background: #111 !important;
+  border-color: #111 !important;
+  color: #fff !important;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.06);
+}
+
+:root:not([data-theme="dark"]) .brand-initials {
+  color: #111 !important;
+  background: linear-gradient(135deg, #ffffff, #f0f0f0) !important;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.04);
+}
+
+:root:not([data-theme="dark"]) .prism-title,
+:root:not([data-theme="dark"]) .brand-title,
+:root:not([data-theme="dark"]) .brand-title.gradient {
+  color: #111 !important;
+}
+
+/* Disable decorative header glow and heavy particle effects on light blob background to reduce visual noise */
+:root:not([data-theme="dark"]) .app-header { background: transparent; border-bottom: none; }
+:root:not([data-theme="dark"]) .nfc-particles,
+:root:not([data-theme="dark"]) #projector,
+:root:not([data-theme="dark"]) .tubes-root,
+:root:not([data-theme="dark"]) .neural-root {
+  display: none !important;
+}
 /* animated background */
 body {
   background: radial-gradient(1200px 600px at 10% 10%, rgba(9,109,217,0.06), transparent 10%),

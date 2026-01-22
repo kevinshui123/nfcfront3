@@ -3,8 +3,8 @@ import { Button, Tooltip } from 'antd'
 import { SunOutlined, MoonOutlined, GlobalOutlined } from '@ant-design/icons'
 
 export default function TopControls() {
-  // Force dark theme (remove day/night toggle UI)
-  const [theme] = useState('dark')
+  // Default theme: prefer saved theme or light (we want dark text on light blob background)
+  const [theme] = useState(localStorage.getItem('sz_theme') || 'light')
   const [lang, setLang] = useState(localStorage.getItem('sz_lang') || 'en')
 
   useEffect(() => {

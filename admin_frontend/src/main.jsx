@@ -1,10 +1,10 @@
-// Force rebuild - added comment 2
 import React, { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import 'antd/dist/reset.css'
 import './styles.css'
+import './mobile-fixes.css'
 import { ConfigProvider } from 'antd'
 import LoginPage from './pages/Login'
 import Dashboard from './pages/Dashboard'
@@ -13,7 +13,7 @@ import MerchantPage from './pages/Merchant'
 import MerchantDashboard from './pages/MerchantDashboard'
 import TokenView from './pages/TokenView'
 import PublishPage from './pages/Publish'
-import NeuralBackground from './components/NeuralBackground'
+import BlobBackground from './components/BlobBackground'
 
 // set document title and favicon
 try {
@@ -37,7 +37,7 @@ function App() {
         },
       }}
     >
-    <NeuralBackground />
+    <BlobBackground />
     <BrowserRouter>
       <BodyClassToggler />
       <Routes>
@@ -69,6 +69,3 @@ function BodyClassToggler() {
   }, [location])
   return null
 }
-
-
-\//" Force "rebuild\  
